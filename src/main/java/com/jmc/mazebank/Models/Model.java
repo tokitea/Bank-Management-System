@@ -39,13 +39,14 @@ public class Model {
     // Refactored constructor for testing - I need this when I test the case when the database  is epmty
     Model(DatabaseDriver databaseDriver) {
         this.databaseDriver = databaseDriver;
-        this.client = null;
-        this.allTransactions = FXCollections.observableArrayList(); // Initialize properly
-        this.latestTransactions = FXCollections.observableArrayList(); // Initialize properly
-        this.viewFactory = null;
-        this.clients = FXCollections.observableArrayList(); // Always initialize
+        this.client = new Client("", "", "", null, null, null);
+        this.allTransactions = FXCollections.observableArrayList();
+        this.latestTransactions = FXCollections.observableArrayList();
+        this.viewFactory = new ViewFactory();
+        this.clients = FXCollections.observableArrayList();
+        this.clientLoginSuccessFlag = false;
+        this.adminLoginSuccessFlag = false;
     }
-
 
 
     public static synchronized Model getInstance() {
