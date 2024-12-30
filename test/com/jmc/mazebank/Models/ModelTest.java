@@ -30,7 +30,7 @@ class ModelTest {
         assertTrue(controller.getClients().isEmpty(), "Clients list should be empty for empty ResultSet.");
     }*/
 
-    @Test
+    @Test // list empty -
     void setClients() throws  Exception{
         ResultSet resultSet = Mockito.mock(ResultSet.class);
         Mockito.when(resultSet.next()).thenReturn(false); // making the database empty
@@ -80,6 +80,76 @@ class ModelTest {
         // Verify that the clients list contains exactly one client
         assertEquals(1, model.getClients().size(), "Clients list should contain one client.");
     }
+   /* @Test
+    void testSetClientsWithLargeData() throws Exception {
+        // Number of clients to simulate
+        int numClients = 1000;
+
+        // Create a mock ResultSet
+        ResultSet resultSet = Mockito.mock(ResultSet.class);
+
+        // Mock the `next()` method to return true for the specified number of clients
+        Mockito.when(resultSet.next()).thenReturn(true);
+        for (int i = 1; i < numClients; i++) {
+            Mockito.when(resultSet.next()).thenReturn(true);
+
+        }
+        Mockito.when(resultSet.next()).thenReturn(false);  // End of result set
+
+        // Mock behavior for getString() to return dummy data for each column
+        Mockito.when(resultSet.getString(Mockito.eq("FirstName"))).thenAnswer(invocation -> "First Name " + invocation.getArgument(0));
+        Mockito.when(resultSet.getString(Mockito.eq("LastName"))).thenReturn("Last Name");
+        Mockito.when(resultSet.getString(Mockito.eq("PayeeAddress"))).thenReturn("Address");
+        Mockito.when(resultSet.getString(Mockito.eq("Date"))).thenReturn("2023-01-01");
+
+        // Mock DatabaseDriver to return the mocked ResultSet
+        DatabaseDriver databaseDriver = Mockito.mock(DatabaseDriver.class);
+        Mockito.when(databaseDriver.getAllClientsData()).thenReturn(resultSet);
+
+        // Inject the mock into the Model
+        Model model = new Model(databaseDriver);
+
+        // Call the setClients() method to populate the clients list
+        model.setClients();
+
+        // Assert that the expected number of clients were added
+        assertEquals(numClients, model.getClients().size(), "The number of clients should be " + numClients);
+    }*/
+
+    @Test
+    void testSetClientsWithFiveRows() throws Exception {
+        // Create a mock ResultSet
+        ResultSet resultSet = Mockito.mock(ResultSet.class);
+
+        // Mock behavior for next() to return true 5 times to simulate 5 rows in the result set
+        Mockito.when(resultSet.next())
+                .thenReturn(true)  // First row
+                .thenReturn(true)  // Second row
+                .thenReturn(true)  // Third row
+                .thenReturn(true)  // Fourth row
+                .thenReturn(true)  // Fifth row
+                .thenReturn(false); // End of result set
+
+        // Mock behavior for getString() to return dummy data for each column
+        Mockito.when(resultSet.getString("FirstName")).thenReturn("First Name");
+        Mockito.when(resultSet.getString("LastName")).thenReturn("Last Name");
+        Mockito.when(resultSet.getString("PayeeAddress")).thenReturn("Address");
+        Mockito.when(resultSet.getString("Date")).thenReturn("2023-01-01");
+
+        // Mock DatabaseDriver to return the mocked ResultSet
+        DatabaseDriver databaseDriver = Mockito.mock(DatabaseDriver.class);
+        Mockito.when(databaseDriver.getAllClientsData()).thenReturn(resultSet);
+
+        // Inject the mock into the Model
+        Model model = new Model(databaseDriver);
+
+        // Call the setClients() method to populate the clients list
+        model.setClients();
+
+        // Assert that 5 clients were added
+        assertEquals(5, model.getClients().size(), "The number of clients should be 5");
+    }
+
 
 
 }
