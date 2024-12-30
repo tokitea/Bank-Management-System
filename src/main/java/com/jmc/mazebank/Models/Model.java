@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 
 public class Model {
+
     private static Model model;
     private final ViewFactory viewFactory;
     private final DatabaseDriver databaseDriver;
@@ -19,6 +20,8 @@ public class Model {
     // Admin Data Section
     private boolean adminLoginSuccessFlag;
     private final ObservableList<Client> clients;
+
+
 
     private Model() {
         this.viewFactory = new ViewFactory();
@@ -32,6 +35,18 @@ public class Model {
         this.adminLoginSuccessFlag = false;
         this.clients = FXCollections.observableArrayList();
     }
+
+    // Refactored constructor for testing - I need this when I test the case when the database  is epmty
+    Model(DatabaseDriver databaseDriver) {
+        this.databaseDriver = databaseDriver;
+        this.client = null;
+        this.allTransactions = FXCollections.observableArrayList(); // Initialize properly
+        this.latestTransactions = FXCollections.observableArrayList(); // Initialize properly
+        this.viewFactory = null;
+        this.clients = FXCollections.observableArrayList(); // Always initialize
+    }
+
+
 
     public static synchronized Model getInstance() {
         if (model == null){

@@ -19,7 +19,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.8.1</version>
+            <version>4.8.1</version> <!-- Updated version -->
             <scope>test</scope>
         </dependency>
 
@@ -45,19 +45,22 @@
             <version>3.36.0.3</version>
         </dependency>
 
-        <!-- JUnit Dependencies -->
+        <!-- JUnit 5 Dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- JUnit 4 Dependency (if needed) -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

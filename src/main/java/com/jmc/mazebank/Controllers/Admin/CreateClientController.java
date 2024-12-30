@@ -70,6 +70,7 @@ public class CreateClientController implements Initializable {
     }
 
     private void createAccount(String accountType) {
+
         double balance = Double.parseDouble(ch_amount_fld.getText());
         // Generate Account Number
         String firstSection = "3201";

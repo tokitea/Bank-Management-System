@@ -13,7 +13,7 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
-public class DashboardController implements Initializable {
+public class   DashboardController implements Initializable {
     public Text user_name;
     public Label login_date;
     public Label checking_bal;
