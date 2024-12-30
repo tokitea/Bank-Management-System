@@ -35,7 +35,7 @@ public class DepositController implements Initializable {
         client = searchResults.get(0);
     }
 
-    private void onDeposit() {
+    void onDeposit() {
         double amount = Double.parseDouble(amount_fld.getText());
         double newBalance = amount + client.savingsAccountProperty().get().balanceProperty().get();
         if (amount_fld.getText() != null){
@@ -48,4 +48,5 @@ public class DepositController implements Initializable {
         pAddress_fld.setText("");
         amount_fld.setText("");
     }
+
 }

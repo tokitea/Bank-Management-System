@@ -40,6 +40,7 @@ public class Model {
         return model;
     }
 
+
     public ViewFactory getViewFactory() {
         return viewFactory;
     }
