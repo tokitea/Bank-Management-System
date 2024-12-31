@@ -20,7 +20,7 @@ profile:
 
 projectJDK: 15 #(Applied in CI/CD pipeline)
 
-#Execute she,ll command before Qodana execution (Applied in CI/CD pipeline)
+#Execute shell command before Qodana execution (Applied in CI/CD pipeline)
 #bootstrap: sh ./prepare-qodana.sh
 
 #Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
@@ -28,4 +28,4 @@ projectJDK: 15 #(Applied in CI/CD pipeline)
 #  - id: <plugin.id> #(plugin id can be found at https://plugins.jetbrains.com)
 
 #Specify Qodana linter for analysis (Applied in CI/CD pipeline)
-linter: jetbrains/qodana-jvm-community:latest
+linter: jetbrains/qodana-jvm:latest

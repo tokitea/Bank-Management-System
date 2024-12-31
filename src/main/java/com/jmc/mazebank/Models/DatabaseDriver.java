@@ -1,14 +1,18 @@
 package com.jmc.mazebank.Models;
 
+import javafx.beans.property.DoubleProperty;
+
 import java.sql.*;
 import java.time.LocalDate;
 
+import static java.sql.DriverManager.getConnection;
+
 public class DatabaseDriver {
-    private Connection conn;
+    protected Connection conn;//changed from private to protected for testing purpose-ziko
 
     public DatabaseDriver() {
         try {
-            this.conn = DriverManager.getConnection("jdbc:sqlite:mazebank.db");
+            this.conn = getConnection("jdbc:sqlite:mazebank.db");
         } catch (SQLException e){
             e.printStackTrace();
         }
@@ -43,7 +47,7 @@ public class DatabaseDriver {
     }
 
     // Method returns savings account balance
-    public double getSavingsAccountBalance(String pAddress) {
+/*  public double getSavingsAccountBalance(String pAddress) {
         Statement statement;
         ResultSet resultSet;
         double balance = 0;
@@ -55,10 +59,33 @@ public class DatabaseDriver {
             e.printStackTrace();
         }
         return balance;
+    }*/
+    public double getSavingsAccountBalance(String pAddress) {
+        String query = "SELECT Balance FROM SavingsAccounts WHERE Owner = ?";
+        double balance = 0.0;
+
+        try (PreparedStatement preparedStatement = this.conn.prepareStatement(query)) {
+            preparedStatement.setString(1, pAddress);
+            System.out.println("Executing query: " + query + " with parameter: " + pAddress);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    balance = resultSet.getDouble("Balance");
+                    System.out.println("Retrieved balance: " + balance);
+                } else {
+                    System.out.println("No record found for the given address: " + pAddress);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return balance;
     }
 
+
     // Method to either add or subtract from balance given operation
-    public void updateBalance(String pAddress, double amount, String operation) {
+  /*public void updateBalance(String pAddress, double amount, String operation) {
         Statement statement;
         ResultSet resultSet;
         try{
@@ -68,14 +95,47 @@ public class DatabaseDriver {
             if (operation.equals("ADD")){
                 newBalance = resultSet.getDouble("Balance") + amount;
                 statement.executeUpdate("UPDATE SavingsAccounts SET Balance="+newBalance+" WHERE Owner='"+pAddress+"';");
-            } else {
+            } else if (operation.equals(("SUBTRACT"))){
                 if (resultSet.getDouble("Balance") >= amount) {
                     newBalance = resultSet.getDouble("Balance") - amount;
                     statement.executeUpdate("UPDATE SavingsAccounts SET Balance="+newBalance+" WHERE Owner='"+pAddress+"';");
                 }
-            }
+            }else{//-z
+            throw new IllegalArgumentException("Invalid operation. Use 'ADD' or 'SUBTRACT'.");}
+
         }catch (SQLException e){
+
+
             e.printStackTrace();
+        }
+    }*/
+
+
+    public void updateBalance(String pAddress, double amount, String operation) {
+        if (pAddress == null || pAddress.isEmpty()) {throw new IllegalArgumentException("Account address cannot be null or empty.");}
+        if (amount < 0) {throw new IllegalArgumentException("Invalid amount. Amount cannot be less than 0.");}
+        if (amount > 2000) {throw new IllegalArgumentException("Invalid amount. Exceeds the maximum allowed limit.");}
+        try (Statement statement = this.conn.createStatement()) {
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM SavingsAccounts WHERE Owner='" + pAddress + "';");
+            if (!resultSet.next()) {throw new IllegalArgumentException("Account not found for the given address.");}
+            double currentBalance = resultSet.getDouble("Balance");
+            double newBalance;
+            if (operation.equals("ADD")) {
+                newBalance = currentBalance + amount;
+                statement.executeUpdate("UPDATE SavingsAccounts SET Balance=" + newBalance + " WHERE Owner='" + pAddress + "';");
+            } else if (operation.equals("SUB")) {
+                if (currentBalance >= amount) {
+                    newBalance = currentBalance - amount;
+                    statement.executeUpdate("UPDATE SavingsAccounts SET Balance=" + newBalance + " WHERE Owner='" + pAddress + "';");
+                } else {
+                    throw new IllegalArgumentException("Insufficient balance for the requested subtraction.");
+                }
+            } else {
+                throw new IllegalArgumentException("Invalid operation. Use 'ADD' or 'SUBTRACT'.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Database operation failed.", e);
         }
     }
 

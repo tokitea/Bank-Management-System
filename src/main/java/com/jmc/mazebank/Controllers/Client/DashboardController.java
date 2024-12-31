@@ -1,6 +1,7 @@
 package com.jmc.mazebank.Controllers.Client;
 
 import com.jmc.mazebank.Models.Model;
+import com.jmc.mazebank.Models.SavingsAccount;
 import com.jmc.mazebank.Models.Transaction;
 import com.jmc.mazebank.Views.TransactionCellFactory;
 import javafx.beans.binding.Bindings;
@@ -66,7 +67,11 @@ public class   DashboardController implements Initializable {
             e.printStackTrace();
         }
         // Subtract from sender's savings account
-        Model.getInstance().getDatabaseDriver().updateBalance(sender, amount, "SUB");
+        try {
+            Model.getInstance().getDatabaseDriver().updateBalance(sender, amount, "SUB");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         // Update the savings account balance in the client object
         Model.getInstance().getClient().savingsAccountProperty().get().setBalance(Model.getInstance().getDatabaseDriver().getSavingsAccountBalance(sender));
         // Record new transaction
