@@ -39,7 +39,12 @@ public class DatabaseDriver {
         ResultSet resultSet = null;
         try {
             statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM Transactions WHERE Sender='"+pAddress+"' OR Receiver='"+pAddress+"' LIMIT "+limit+";");
+            //changed ziko
+            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM Transactions WHERE Sender=? OR Receiver=? LIMIT ?");
+            preparedStatement.setString(1, pAddress);
+            preparedStatement.setString(2, pAddress);
+            preparedStatement.setInt(3, limit);
+             resultSet = preparedStatement.executeQuery();
         }catch (SQLException e){
             e.printStackTrace();
         }
@@ -117,7 +122,8 @@ public class DatabaseDriver {
         if (amount > 2000) {throw new IllegalArgumentException("Invalid amount. Exceeds the maximum allowed limit.");}
         try (Statement statement = this.conn.createStatement()) {
             ResultSet resultSet = statement.executeQuery("SELECT * FROM SavingsAccounts WHERE Owner='" + pAddress + "';");
-            if (!resultSet.next()) {throw new IllegalArgumentException("Account not found for the given address.");}
+            if (!resultSet.next()) {
+                throw new IllegalArgumentException("Account not found for the given address.");}
             double currentBalance = resultSet.getDouble("Balance");
             double newBalance;
             if (operation.equals("ADD")) {

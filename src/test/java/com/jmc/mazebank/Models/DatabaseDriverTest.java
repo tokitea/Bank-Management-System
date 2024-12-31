@@ -1,3 +1,104 @@
+/*package com.jmc.mazebank.Models;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+*/
+/*
+class DatabaseDriverTest {
+    private DatabaseDriver databaseDriver;
+
+    @BeforeEach
+    void setUp() {
+        databaseDriver = new DatabaseDriver(); // Replace with your actual implementation
+    }
+
+    @Test
+    void testBoundaryMinInvalid() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            databaseDriver.updateBalance("client1_test", -1.00, "ADD");
+        });
+
+        assertEquals("Invalid amount. Amount cannot be less than 0.", exception.getMessage());
+    }
+
+    @Test
+    void testBoundaryMinValid() {
+        databaseDriver.updateBalance("client1_test", 0.00, "ADD");
+        double balance = databaseDriver.getSavingsAccountBalance("client1_test");
+
+        assertEquals(100.00, balance, 0.01); // Assuming the initial balance is 100.00
+    }
+
+    @Test
+    void testBoundaryMinPlusValid() {
+        databaseDriver.updateBalance("client1_test", 1.00, "ADD");
+        double balance = databaseDriver.getSavingsAccountBalance("client1_test");
+
+        assertEquals(101.00, balance, 0.01); // Assuming the initial balance is 100.00
+    }
+
+    @Test
+    void testBoundaryNominal() {
+        databaseDriver.updateBalance("client1_test", 1000.00, "ADD");
+        double balance = databaseDriver.getSavingsAccountBalance("client1_test");
+
+        assertEquals(1100.00, balance, 0.01); // Assuming the initial balance is 100.00
+    }
+
+    @Test
+    void testBoundaryMaxMinusValid() {
+        databaseDriver.updateBalance("client1_test", 1999.00, "ADD");
+        double balance = databaseDriver.getSavingsAccountBalance("client1_test");
+
+        assertEquals(2099.00, balance, 0.01); // Assuming the initial balance is 100.00
+    }
+
+    @Test
+    void testBoundaryMaxValid() {
+        databaseDriver.updateBalance("client1_test", 2000.00, "ADD");
+        double balance = databaseDriver.getSavingsAccountBalance("client1_test");
+
+        assertEquals(2100.00, balance, 0.01); // Assuming the initial balance is 100.00
+    }
+
+    @Test
+    void testBoundaryMaxPlusInvalid() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            databaseDriver.updateBalance("client1_test", 2001.00, "ADD");
+        });
+
+        assertEquals("Invalid amount. Exceeds the maximum allowed limit.", exception.getMessage());
+    }
+
+    @Test
+    void testInvalidOperation() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            databaseDriver.updateBalance("client1_test", 50.00, "MULTIPLY");
+        });
+
+        assertEquals("Invalid operation. Use 'ADD' or 'SUBTRACT'.", exception.getMessage());
+    }
+
+    @Test
+    void testSQLExceptionHandling() {
+        try {
+            databaseDriver.updateBalance("client1_test", 50.00, "ADD");
+        } catch (RuntimeException e) {
+            assertTrue(e.getMessage().contains("Database operation failed."));
+        }
+    }
+
+    // Add more tests for subtraction scenarios and edge cases as needed
+
+    // Example of a concrete implementation for testing purposes
+
+
+}
+*/
+
+
 package com.jmc.mazebank.Models;
 
 import org.junit.jupiter.api.BeforeEach;

@@ -97,7 +97,7 @@ public class Model {
         }
     }
 
-    private void prepareTransactions(ObservableList<Transaction> transactions, int limit) {
+    protected void prepareTransactions(ObservableList<Transaction> transactions, int limit) {
         ResultSet resultSet = databaseDriver.getTransactions(this.client.pAddressProperty().get(), limit);
         try {
             while (resultSet.next()){
