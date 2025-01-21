@@ -28,9 +28,41 @@ public class LoginController implements Initializable {
         acc_selector.valueProperty().addListener(observable -> setAcc_selector());
         login_btn.setOnAction(event -> onLogin());
     }
+    public void onLogin() {
+        if (error_lbl.getScene() == null) {
+            error_lbl.setText("Error: Scene is not fully loaded.");
+            return;
+        }
 
-    private void onLogin() {
         Stage stage = (Stage) error_lbl.getScene().getWindow();
+
+        if (Model.getInstance().getViewFactory().getLoginAccountType() == AccountType.CLIENT) {
+            Model.getInstance().evaluateClientCred(payee_address_fld.getText(), password_fld.getText());
+            if (Model.getInstance().getClientLoginSuccessFlag()) {
+                Model.getInstance().getViewFactory().showClientWindow();
+                Model.getInstance().getViewFactory().closeStage(stage);
+            } else {
+                payee_address_fld.clear();
+                password_fld.clear();
+                error_lbl.setText("No Such Login Credentials.");
+            }
+        } else {
+            Model.getInstance().evaluateAdminCred(payee_address_fld.getText(), password_fld.getText());
+            if (Model.getInstance().getAdminLoginSuccessFlag()) {
+                Model.getInstance().getViewFactory().showAdminWindow();
+                Model.getInstance().getViewFactory().closeStage(stage);
+            } else {
+                payee_address_fld.clear();
+                password_fld.clear();
+                error_lbl.setText("No Such Login Credentials");
+            }
+        }
+    }
+
+/*
+    public void onLogin() {
+        Stage stage = (Stage) error_lbl.getScene().getWindow();
+
         if (Model.getInstance().getViewFactory().getLoginAccountType() == AccountType.CLIENT){
             // Evaluate Client Login Credentials
             Model.getInstance().evaluateClientCred(payee_address_fld.getText(), password_fld.getText());
@@ -56,9 +88,9 @@ public class LoginController implements Initializable {
                 error_lbl.setText("No Such Login Credentials");
             }
         }
-    }
+    }*/
 
-    private void setAcc_selector() {
+    public void setAcc_selector() {
         Model.getInstance().getViewFactory().setLoginAccountType(acc_selector.getValue());
         // Change Payee Address label accordingly
         if (acc_selector.getValue() == AccountType.ADMIN){
@@ -67,4 +99,6 @@ public class LoginController implements Initializable {
             payee_address_lbl.setText("Payee Address:");
         }
     }
+
+
 }
