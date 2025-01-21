@@ -11,7 +11,9 @@ public class Model {
 
     private static Model model;
     private final ViewFactory viewFactory;
-    private final DatabaseDriver databaseDriver;
+    private  DatabaseDriver databaseDriver;
+
+    //private final DatabaseDriver databaseDriver;
     // Client Data Section
     private final Client client;
     private boolean clientLoginSuccessFlag;
@@ -225,5 +227,9 @@ public class Model {
             e.printStackTrace();
         }
         return account;
+    }
+    // New method for setting the database driver (for testing)
+    public void setDatabaseDriver(DatabaseDriver databaseDriver) {
+        this.databaseDriver = databaseDriver;
     }
 }

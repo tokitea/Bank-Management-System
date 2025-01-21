@@ -26,8 +26,8 @@ public class CreateClientController implements Initializable {
     public Label error_lbl;
 
     public String payeeAddress;
-    private boolean createCheckingAccountFlag = false;
-    private boolean createSavingsAccountFlag = false;
+    boolean createCheckingAccountFlag = false;
+    boolean createSavingsAccountFlag = false;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -91,20 +91,37 @@ public void createClient() {
 
 
     //create checking or savings accounts with appropriate account numbers and balance
-    private void createAccount(String accountType) {
+    public void createAccount(String accountType) {
+        // Check if the amount field is empty
+        String amountText = ch_amount_fld.getText();
+        if (amountText.isEmpty()) {
+            // Handle the error case
+            error_lbl.setText("Error: Amount cannot be empty!");
+            return; // Exit the method to prevent further execution
+        }
 
-        double balance = Double.parseDouble(ch_amount_fld.getText());
+        double balance;
+        try {
+            balance = Double.parseDouble(amountText);
+        } catch (NumberFormatException e) {
+            // Handle the case where the input is not a valid double
+            error_lbl.setText("Error: Please enter a valid amount!");
+            return; // Exit the method to prevent further execution
+        }
+
         // Generate Account Number
         String firstSection = "3201";
         String lastSection = Integer.toString((new Random()).nextInt(9999) + 1000);
         String accountNumber = firstSection + " " + lastSection;
-        // Create the checking or Savings account
+
+        // Create the checking or savings account
         if (accountType.equals("Checking")) {
             Model.getInstance().getDatabaseDriver().createCheckingAccount(payeeAddress, accountNumber, 10, balance);
         } else {
             Model.getInstance().getDatabaseDriver().createSavingsAccount(payeeAddress, accountNumber, 2000, balance);
         }
     }
+
 
     //updates the paddressLbl when the payee address is created
     private void onCreatePayeeAddress() {
