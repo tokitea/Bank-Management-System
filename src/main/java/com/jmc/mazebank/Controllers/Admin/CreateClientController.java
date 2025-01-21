@@ -25,7 +25,7 @@ public class CreateClientController implements Initializable {
     public Button create_client_btn;
     public Label error_lbl;
 
-    private String payeeAddress;
+    public String payeeAddress;
     private boolean createCheckingAccountFlag = false;
     private boolean createSavingsAccountFlag = false;
 
@@ -49,26 +49,48 @@ public class CreateClientController implements Initializable {
             }
         });
     }
-
-    private void createClient() {
-        // Create Checking account
-        if (createCheckingAccountFlag){
-            createAccount("Checking");
-        }
-        // Create Savings Account
-        if (createSavingsAccountFlag){
-            createAccount("Savings");
-        }
-        // Create Client
-        String fName = fName_fld.getText();
-        String lName = lName_fld.getText();
-        String password = password_fld.getText();
-        Model.getInstance().getDatabaseDriver().createClient(fName, lName, payeeAddress, password, LocalDate.now());
-        error_lbl.setStyle("-fx-text-fill: blue; -fx-font-size: 1.3em; -fx-font-weight: bold");
-        error_lbl.setText("Client Created Successfully!");
-        emptyFields();
+//client creation and account setup
+public void createClient() {
+    // Validate fields
+    if (fName_fld.getText() == null || fName_fld.getText().trim().isEmpty() || fName_fld.getText().length() < 3) {
+        error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
+        error_lbl.setText("Error: First Name Too Short");
+        return; // Exit if validation fails
     }
 
+    if (lName_fld.getText() == null || lName_fld.getText().trim().isEmpty()) {
+        error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
+        error_lbl.setText("Error: Last Name is required!");
+        return; // Exit if validation fails
+    }
+
+    if (password_fld.getText() == null || password_fld.getText().trim().isEmpty()) {
+        error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
+        error_lbl.setText("Error: Password is required!");
+        return; // Exit if validation fails
+    }
+
+    // Create Checking account
+    if (createCheckingAccountFlag) {
+        createAccount("Checking");
+    }
+    // Create Savings Account
+    if (createSavingsAccountFlag) {
+        createAccount("Savings");
+    }
+    // Create Client
+    String fName = fName_fld.getText();
+    String lName = lName_fld.getText();
+    String password = password_fld.getText();
+    Model.getInstance().getDatabaseDriver().createClient(fName, lName, payeeAddress, password, LocalDate.now()); // Create client in database
+
+    error_lbl.setStyle("-fx-text-fill: blue; -fx-font-size: 1.3em; -fx-font-weight: bold");
+    error_lbl.setText("Client Created Successfully!");
+    emptyFields();
+}
+
+
+    //create checking or savings accounts with appropriate account numbers and balance
     private void createAccount(String accountType) {
 
         double balance = Double.parseDouble(ch_amount_fld.getText());
@@ -84,27 +106,51 @@ public class CreateClientController implements Initializable {
         }
     }
 
+    //updates the paddressLbl when the payee address is created
     private void onCreatePayeeAddress() {
         if (fName_fld.getText() != null & lName_fld.getText() != null){
             pAddress_lbl.setText(payeeAddress);
         }
     }
 
+   //generates a payee address based on the clint's first name last name and ID
     private String createPayeeAddress() {
         int id = Model.getInstance().getDatabaseDriver().getLastClientsId() + 1;
         char fChar = Character.toLowerCase(fName_fld.getText().charAt(0));
         return "@"+fChar+lName_fld.getText()+id;
     }
 
+    //clears all fields and resets controls to their default state
     private void emptyFields() {
         fName_fld.setText("");
         lName_fld.setText("");
         password_fld.setText("");
-        pAddress_box.setSelected(false);
-        pAddress_lbl.setText("");
-        ch_acc_box.setSelected(false);
-        ch_amount_fld.setText("");
-        sv_acc_box.setSelected(false);
-        sv_amount_fld.setText("");
+
+        // Check if pAddress_box is initialized before accessing it
+        if (pAddress_box != null) {
+            pAddress_box.setSelected(false); // Safely setting the checkbox
+        }
+        //pAddress_box.setSelected(false);
+        // Check if pAddress_lbl is initialized before accessing it
+        if (pAddress_lbl != null) {
+            pAddress_lbl.setText(""); // Safely setting the label text
+        }
+      //  pAddress_lbl.setText("");
+       // ch_acc_box.setSelected(false);
+        if (ch_acc_box != null) {
+            ch_acc_box.setSelected(false); // Safely setting the checkbox
+        }
+        if (ch_amount_fld != null) {
+            ch_amount_fld.setText(""); // Safely setting the checkbox
+        }
+        //ch_amount_fld.setText("");
+       // sv_acc_box.setSelected(false);
+        if (sv_acc_box != null) {
+            sv_acc_box.setSelected(false); // Safely setting the checkbox
+        }
+        if (sv_amount_fld != null) {
+            sv_amount_fld.setText(""); // Safely setting the checkbox
+        }
+        //sv_amount_fld.setText("");
     }
 }
