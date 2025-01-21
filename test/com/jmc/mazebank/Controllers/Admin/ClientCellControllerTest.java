@@ -28,7 +28,7 @@ class ClientCellControllerTest {
     Account savingsAccount = new SavingsAccount("fName", "SAV67890", 1000, 400);
     LocalDate localDate = LocalDate.now();
 
-   @BeforeAll
+    @BeforeAll
     public static void initToolkit() {
         // Start the JavaFX toolkit
         Platform.startup(() -> {});

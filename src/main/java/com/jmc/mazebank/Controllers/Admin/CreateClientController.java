@@ -124,18 +124,36 @@ public void createClient() {
 
 
     //updates the paddressLbl when the payee address is created
-    private void onCreatePayeeAddress() {
-        if (fName_fld.getText() != null & lName_fld.getText() != null){
+    protected void onCreatePayeeAddress() {
+        if (fName_fld.getText() != null && !fName_fld.getText().isEmpty() &&
+                lName_fld.getText() != null && !lName_fld.getText().isEmpty()){
             pAddress_lbl.setText(payeeAddress);
         }
+        else {
+            pAddress_lbl.setText("Error: First and last name are required.");
+        }
     }
-
    //generates a payee address based on the clint's first name last name and ID
-    private String createPayeeAddress() {
-        int id = Model.getInstance().getDatabaseDriver().getLastClientsId() + 1;
-        char fChar = Character.toLowerCase(fName_fld.getText().charAt(0));
-        return "@"+fChar+lName_fld.getText()+id;
-    }
+   protected String createPayeeAddress() {
+       long id = (long)Model.getInstance().getDatabaseDriver().getLastClientsId() ;
+       if (id < 0) {
+           throw new IllegalArgumentException("Client ID cannot be negative");
+       }
+       id++;
+
+       String firstName = fName_fld.getText();
+       String lastName = lName_fld.getText();
+
+       if (firstName == null || firstName.isEmpty()) {
+           throw new StringIndexOutOfBoundsException("First name cannot be null or empty");
+       }
+       if (lastName == null || lastName.isEmpty()) {
+           throw new NullPointerException("Last name cannot be null or empty");
+       }
+
+       char fChar = Character.toLowerCase(firstName.charAt(0));
+       return "@" + fChar + lastName + id;
+   }
 
     //clears all fields and resets controls to their default state
     private void emptyFields() {
