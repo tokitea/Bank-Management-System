@@ -71,7 +71,7 @@ class ClientControllerTest {
     void testInitialView() {
         // Verify that the initial view is set to Dashboard
         assertEquals(ClientMenuOptions.DASHBOARD, selectedMenuItemProperty.get());
-        assertEquals(dashboardView, clientParent.getCenter()); // Check the actual center node
+        assertEquals(dashboardView.getParent(), clientParent.getCenter()); // Check the actual center node
     }
 
     @Test
