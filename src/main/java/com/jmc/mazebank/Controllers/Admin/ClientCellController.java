@@ -17,7 +17,7 @@ public class ClientCellController implements Initializable {
     public Label date_lbl;
     public Button delete_btn;
 
-    private final Client client;
+    protected final Client client;
 
     public ClientCellController(Client client){
         this.client = client;
