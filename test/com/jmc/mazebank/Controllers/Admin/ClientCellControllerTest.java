@@ -28,11 +28,11 @@ class ClientCellControllerTest {
     Account savingsAccount = new SavingsAccount("fName", "SAV67890", 1000, 400);
     LocalDate localDate = LocalDate.now();
 
-    @BeforeAll
+   /* @BeforeAll
     public static void initToolkit() {
         // Start the JavaFX toolkit
         Platform.startup(() -> {});
-    }
+    }*/
 
     @BeforeEach
     void setUp() {
@@ -49,6 +49,7 @@ class ClientCellControllerTest {
         controller = new ClientCellController(mockClient);
 
         // Mock Labels
+
         controller.fName_lbl = new Label();
         controller.lName_lbl = new Label();
         controller.pAddress_lbl = new Label();
