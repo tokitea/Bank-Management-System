@@ -21,13 +21,13 @@ import static org.mockito.Mockito.*;
 class CreateClientControllerTest {
     private CreateClientController controller;
     private DatabaseDriver mockDatabaseDriver;
-
+/*
     @BeforeAll
     static void initToolkit() {
         // Initialize the JavaFX toolkit
         Platform.startup(() -> {});
     }
-
+*/
     @BeforeEach
     void setUp() {
         // Create the controller
