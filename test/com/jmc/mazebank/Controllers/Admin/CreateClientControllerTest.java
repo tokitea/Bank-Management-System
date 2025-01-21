@@ -22,11 +22,11 @@ class CreateClientControllerTest {
     private CreateClientController controller;
     private DatabaseDriver mockDatabaseDriver;
 
-    @BeforeAll
+    /*@BeforeAll
     static void initToolkit() {
         // Initialize the JavaFX toolkit
         Platform.startup(() -> {});
-    }
+    }*/
 
     @BeforeEach
     void setUp() {
@@ -312,7 +312,7 @@ class CreateClientControllerTest {
     }
     @Test
     void testCreatePayeeAddressLargeClientId() {
-        // Arrange
+        // Arrange mos se nuk eshtw qty
         when(mockDatabaseDriver.getLastClientsId()).thenReturn(Integer.MAX_VALUE);
         controller.fName_fld.setText("Max");
         controller.lName_fld.setText("Payne");
