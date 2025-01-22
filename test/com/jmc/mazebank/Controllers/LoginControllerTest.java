@@ -118,8 +118,8 @@ class LoginControllerTest {
 
         // Create controller and inject mocks
         LoginController controller = new LoginController();
-        controller.payee_address_fld = new TextField("validAddress");
-        controller.password_fld = new TextField("validPassword");
+        controller.payee_address_fld = new TextField("@BBaker1");
+        controller.password_fld = new TextField("123456");
         controller.error_lbl = new Label();
         controller.login_btn = new Button();
 
@@ -183,6 +183,6 @@ class LoginControllerTest {
         // Verify fields are cleared and error message is shown
         assertEquals("", payee_address_fld.getText());
         assertEquals("", password_fld.getText());
-        assertEquals("No Such Login Credentials", error_lbl.getText());
+        assertEquals("No Such Login Credentials.", error_lbl.getText());
     }
 }
