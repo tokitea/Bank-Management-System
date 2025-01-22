@@ -9,6 +9,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -29,34 +30,32 @@ public class LoginController implements Initializable {
         login_btn.setOnAction(event -> onLogin());
     }
     public void onLogin() {
-        if (error_lbl.getScene() == null) {
-            error_lbl.setText("Error: Scene is not fully loaded.");
-            return;
-        }
-
-        Stage stage = (Stage) error_lbl.getScene().getWindow();
-
         if (Model.getInstance().getViewFactory().getLoginAccountType() == AccountType.CLIENT) {
             Model.getInstance().evaluateClientCred(payee_address_fld.getText(), password_fld.getText());
             if (Model.getInstance().getClientLoginSuccessFlag()) {
-                Model.getInstance().getViewFactory().showClientWindow();
-                Model.getInstance().getViewFactory().closeStage(stage);
+                Model.getInstance().getViewFactory().showClientWindow(); // Open client window
+                closeCurrentWindow(); // Close login window
             } else {
-                payee_address_fld.clear();
-                password_fld.clear();
-                error_lbl.setText("No Such Login Credentials.");
+                handleLoginError();
             }
         } else {
             Model.getInstance().evaluateAdminCred(payee_address_fld.getText(), password_fld.getText());
             if (Model.getInstance().getAdminLoginSuccessFlag()) {
-                Model.getInstance().getViewFactory().showAdminWindow();
-                Model.getInstance().getViewFactory().closeStage(stage);
+                Model.getInstance().getViewFactory().showAdminWindow(); // Open admin window
+                closeCurrentWindow(); // Close login window
             } else {
-                payee_address_fld.clear();
-                password_fld.clear();
-                error_lbl.setText("No Such Login Credentials");
+                handleLoginError();
             }
         }
+    }
+    private void closeCurrentWindow() {
+        login_btn.getScene().getWindow().hide(); // Hide the current window
+    }
+
+    private void handleLoginError() {
+        payee_address_fld.clear();
+        password_fld.clear();
+        error_lbl.setText("No Such Login Credentials.");
     }
 
 /*
