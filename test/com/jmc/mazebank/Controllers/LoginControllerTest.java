@@ -5,16 +5,21 @@ import com.jmc.mazebank.Views.AccountType;
 import com.jmc.mazebank.Views.ViewFactory;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.testfx.api.FxToolkit;
+
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -69,12 +74,25 @@ class LoginControllerTest {
         controller.password_fld = password_fld;
         controller.login_btn = login_btn;
         controller.error_lbl = error_lbl;
+        try {
+            FxToolkit.registerPrimaryStage();
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        }
 
+        // Attach login button to a stage
+        Platform.runLater(() -> {
+            Stage primaryStage = new Stage();
+            primaryStage.setScene(new Scene(new VBox(controller.login_btn)));
+            primaryStage.show();
+        });
         Model.setInstance(mockModel);
 
         // Call initialize
         controller.initialize(null, null);
+
     }
+
 
     @Test
     void testInitialization() {
@@ -154,18 +172,33 @@ class LoginControllerTest {
     }
 
     @Test
-    void testOnLoginSuccessForAdmin() {
+    void testOnLoginSuccessForAdmin() throws Exception {
+        // Set up the primary stage using FxToolkit
+        Stage stage = FxToolkit.registerPrimaryStage();
+
+        // Perform all UI-related setup on the JavaFX thread
+        Platform.runLater(() -> {
+            // Attach the login button to a scene and stage
+            stage.setScene(new javafx.scene.Scene(new javafx.scene.layout.VBox(controller.login_btn)));
+            stage.show();
+        });
+
+        // Wait for the JavaFX thread to complete
+        FxToolkit.setupStage(s -> s.setScene(stage.getScene()));
+
         // Mock admin login success
         when(mockViewFactory.getLoginAccountType()).thenReturn(AccountType.ADMIN);
         when(mockModel.getAdminLoginSuccessFlag()).thenReturn(true);
 
         // Trigger login
-        controller.onLogin();
+        Platform.runLater(() -> controller.onLogin());
 
         // Verify admin window is shown and stage is closed
         verify(mockViewFactory).showAdminWindow();
-        verify(mockViewFactory).closeStage(any(Stage.class));
+        verify(mockViewFactory).closeStage(stage);
     }
+
+
 
     @Test
     void testOnLoginFailureForAdmin() {
