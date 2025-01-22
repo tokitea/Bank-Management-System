@@ -3,6 +3,7 @@ package com.jmc.mazebank.Controllers.Client;
 import com.jmc.mazebank.Models.Model;
 import com.jmc.mazebank.Models.Transaction;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -20,23 +21,30 @@ public class TransactionCellController implements Initializable {
     public Button message_btn;
     public Label amount_lbl;
 
-    private final Transaction transaction;
+    private Transaction transaction;
 
     public TransactionCellController(Transaction transaction){
         this.transaction = transaction;
     }
 
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        sender_lbl.textProperty().bind(transaction.senderProperty());
-        receiver_lbl.textProperty().bind(transaction.receiverProperty());
-        amount_lbl.textProperty().bind(transaction.amountProperty().asString());
-        trans_date_lbl.textProperty().bind(transaction.dateProperty().asString());
+
+
+            sender_lbl.textProperty().bind(transaction.senderProperty());
+            receiver_lbl.textProperty().bind(transaction.receiverProperty());
+            amount_lbl.textProperty().bind(transaction.amountProperty().asString());
+            trans_date_lbl.textProperty().bind(transaction.dateProperty().asString());
+
         message_btn.setOnAction(event -> Model.getInstance().getViewFactory().showMessageWindow(transaction.senderProperty().get(), transaction.messageProperty().get()));
         transactionIcons();
     }
 
-    private void transactionIcons() {
+    public void transactionIcons() {
         if (transaction.senderProperty().get().equals(Model.getInstance().getClient().pAddressProperty().get())){
             in_icon.setFill(Color.rgb(240, 240, 240));
             out_icon.setFill(Color.RED);
