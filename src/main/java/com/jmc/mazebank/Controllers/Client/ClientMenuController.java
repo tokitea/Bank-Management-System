@@ -17,6 +17,19 @@ public class ClientMenuController implements Initializable {
     public Button logout_btn;
     public Button report_btn;
 
+    private Model model;
+
+    // Default no-argument constructor required by FXMLLoader
+    public ClientMenuController() {
+        // You can initialize a default model here or leave it null
+        this.model = Model.getInstance(); // Optional: Use a singleton instance as default
+    }
+
+    // Constructor with a Model parameter for dependency injection
+    public ClientMenuController(Model model) {
+        this.model = model;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         addListeners();
@@ -29,26 +42,22 @@ public class ClientMenuController implements Initializable {
         logout_btn.setOnAction(event -> onLogout());
     }
 
-    private void onDashboard() {
-        Model.getInstance().getViewFactory().getClientSelectedMenuItem().set(ClientMenuOptions.DASHBOARD);
+    public void onDashboard() {
+        model.getViewFactory().getClientSelectedMenuItem().set(ClientMenuOptions.DASHBOARD);
     }
 
-    private void onTransactions() {
-        Model.getInstance().getViewFactory().getClientSelectedMenuItem().set(ClientMenuOptions.TRANSACTIONS);
+    public void onTransactions() {
+        model.getViewFactory().getClientSelectedMenuItem().set(ClientMenuOptions.TRANSACTIONS);
     }
 
-    private void onAccounts() {
-        Model.getInstance().getViewFactory().getClientSelectedMenuItem().set(ClientMenuOptions.ACCOUNTS);
+    public void onAccounts() {
+        model.getViewFactory().getClientSelectedMenuItem().set(ClientMenuOptions.ACCOUNTS);
     }
 
-    private void onLogout() {
-        // Get Stage
+    public void onLogout() {
         Stage stage = (Stage) dashboard_btn.getScene().getWindow();
-        // Close the client window
-        Model.getInstance().getViewFactory().closeStage(stage);
-        // Show Login Window
-        Model.getInstance().getViewFactory().showLoginWindow();
-        // Set Client Login Success Flag To False
-        Model.getInstance().setClientLoginSuccessFlag(false);
+        model.getViewFactory().closeStage(stage);
+        model.getViewFactory().showLoginWindow();
+        model.setClientLoginSuccessFlag(false);
     }
 }

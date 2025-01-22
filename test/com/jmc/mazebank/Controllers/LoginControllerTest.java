@@ -26,11 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 class LoginControllerTest {
-    @BeforeAll
+   /* @BeforeAll
     public static void initToolkit() {
         // Start the JavaFX toolkit
         Platform.startup(() -> {});
-    }
+    }*/
 
     @Mock
     private Model mockModel;
