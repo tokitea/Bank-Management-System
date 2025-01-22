@@ -1,19 +1,21 @@
 package com.jmc.mazebank.Controllers.Admin;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import com.jmc.mazebank.Controllers.Admin.AdminMenuController;
 import com.jmc.mazebank.Models.Model;
 import com.jmc.mazebank.Views.AdminMenuOptions;
 import com.jmc.mazebank.Views.ViewFactory;
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit5.ApplicationTest;
-
-import static org.mockito.Mockito.*;
 
 class AdminMenuControllerTest extends ApplicationTest {
 
@@ -23,24 +25,32 @@ class AdminMenuControllerTest extends ApplicationTest {
     private Button depositBtn;
     private Button logoutBtn;
     private Model mockModel;
+    private ViewFactory mockViewFactory;
+    private ObjectProperty<AdminMenuOptions> selectedMenuItem;
+
+    /*@BeforeAll
+    public static void initToolkit() {
+        Platform.startup(() -> {});
+    }*/
 
     @BeforeEach
     void setUp() {
-        // Set up the mock Model instance
+
         mockModel = mock(Model.class);
-        controller = new AdminMenuController();
+        mockViewFactory = mock(ViewFactory.class);
+        selectedMenuItem = new SimpleObjectProperty<>();
 
-        // Mock the necessary methods on Model
-        when(mockModel.getInstance()).thenReturn(mockModel);
 
-        // Mock the ViewFactory and its methods
-        when(mockModel.getViewFactory()).thenReturn(mock(ViewFactory.class));
+        when(mockViewFactory.getAdminSelectedMenuItem()).thenReturn(selectedMenuItem);
+        when(mockModel.getViewFactory()).thenReturn(mockViewFactory);
 
-        // Inject buttons and initialize the controller
-        createClientBtn = mock(Button.class);
-        clientsBtn = mock(Button.class);
-        depositBtn = mock(Button.class);
-        logoutBtn = mock(Button.class);
+
+        controller = new AdminMenuController(mockModel);
+
+        createClientBtn = new Button();
+        clientsBtn = new Button();
+        depositBtn = new Button();
+        logoutBtn = new Button();
 
         controller.create_client_btn = createClientBtn;
         controller.clients_btn = clientsBtn;
@@ -53,33 +63,40 @@ class AdminMenuControllerTest extends ApplicationTest {
     @Test
     void testOnCreateClient() {
         controller.onCreateClient();
-        verify(mockModel.getViewFactory()).getAdminSelectedMenuItem().set(AdminMenuOptions.CREATE_CLIENT);
+        assertEquals(AdminMenuOptions.CREATE_CLIENT, selectedMenuItem.get());
     }
 
     @Test
     void testOnClients() {
         controller.onClients();
-        verify(mockModel.getViewFactory()).getAdminSelectedMenuItem().set(AdminMenuOptions.CLIENTS);
+        assertEquals(AdminMenuOptions.CLIENTS, selectedMenuItem.get());
     }
 
     @Test
     void testOnDeposit() {
         controller.onDeposit();
-        verify(mockModel.getViewFactory()).getAdminSelectedMenuItem().set(AdminMenuOptions.DEPOSIT);
+        assertEquals(AdminMenuOptions.DEPOSIT, selectedMenuItem.get());
     }
 
     @Test
-    void testOnLogout() {
-        // Mock Stage behavior
-        Stage stage = mock(Stage.class);
-        when(clientsBtn.getScene().getWindow()).thenReturn(stage);
+
+    void testOnLogout() throws Exception {
+       //merre ketu ziko
+        Stage stage = FxToolkit.registerPrimaryStage();
+
+        Platform.runLater(() -> {
+            stage.setScene(new javafx.scene.Scene(new javafx.scene.layout.VBox(clientsBtn)));
+            stage.show();
+        });
+
+        FxToolkit.setupStage(s -> s.setScene(stage.getScene()));
 
         controller.onLogout();
 
-        // Verify the behavior of Model methods during logout
-        verify(mockModel.getViewFactory()).closeStage(stage);
-        verify(mockModel.getViewFactory()).showLoginWindow();
+        verify(mockViewFactory).closeStage(stage);
+        verify(mockViewFactory).showLoginWindow();
         verify(mockModel).setAdminLoginSuccessFlag(false);
     }
-}
 
+
+}

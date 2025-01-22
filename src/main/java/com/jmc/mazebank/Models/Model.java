@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public class Model {
 
-    private static Model model;
+    public static Model model;
     private final ViewFactory viewFactory;
     private  DatabaseDriver databaseDriver;
 
@@ -25,7 +25,7 @@ public class Model {
 
 
 
-    private Model() {
+    public Model() {
         this.viewFactory = new ViewFactory();
         this.databaseDriver = new DatabaseDriver();
         // Client Data Section

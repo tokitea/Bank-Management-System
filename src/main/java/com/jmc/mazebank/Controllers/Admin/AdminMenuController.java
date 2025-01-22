@@ -15,38 +15,41 @@ public class AdminMenuController implements Initializable {
     public Button deposit_btn;
     public Button logout_btn;
 
+    private final Model model;
+
+    public AdminMenuController(Model model) {
+        this.model = model;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         addListeners();
     }
 
-    private void addListeners(){
+    private void addListeners() {
         create_client_btn.setOnAction(event -> onCreateClient());
         clients_btn.setOnAction(event -> onClients());
         deposit_btn.setOnAction(event -> onDeposit());
         logout_btn.setOnAction(event -> onLogout());
     }
 
-    private void onCreateClient() {
-        Model.getInstance().getViewFactory().getAdminSelectedMenuItem().set(AdminMenuOptions.CREATE_CLIENT);
+    protected void onCreateClient() {
+        model.getViewFactory().getAdminSelectedMenuItem().set(AdminMenuOptions.CREATE_CLIENT);
     }
 
-    private void onClients() {
-        Model.getInstance().getViewFactory().getAdminSelectedMenuItem().set(AdminMenuOptions.CLIENTS);
+    void onClients() {
+        model.getViewFactory().getAdminSelectedMenuItem().set(AdminMenuOptions.CLIENTS);
     }
 
-    private void onDeposit() {
-        Model.getInstance().getViewFactory().getAdminSelectedMenuItem().set(AdminMenuOptions.DEPOSIT);
+    protected void onDeposit() {
+        model.getViewFactory().getAdminSelectedMenuItem().set(AdminMenuOptions.DEPOSIT);
     }
 
-    private void onLogout() {
-        // Get Stage
+    protected void onLogout() {
+
         Stage stage = (Stage) clients_btn.getScene().getWindow();
-        // Close the Admin window
-        Model.getInstance().getViewFactory().closeStage(stage);
-        // Show Login Window
-        Model.getInstance().getViewFactory().showLoginWindow();
-        // Set Admin Login Success Flag To False
-        Model.getInstance().setAdminLoginSuccessFlag(false);
+        model.getViewFactory().closeStage(stage);
+        model.getViewFactory().showLoginWindow();
+        model.setAdminLoginSuccessFlag(false);
     }
 }
