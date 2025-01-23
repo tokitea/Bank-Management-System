@@ -52,7 +52,7 @@ public class   DashboardController implements Initializable {
         }
     }
 
-    private void onSendMoney() {
+    protected void onSendMoney() {
         String receiver = payee_fld.getText();
         double amount = Double.parseDouble(amount_fld.getText());
         String message = message_fld.getText();

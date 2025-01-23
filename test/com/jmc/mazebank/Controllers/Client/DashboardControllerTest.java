@@ -1,26 +1,24 @@
 package com.jmc.mazebank.Controllers.Client;
 
 import static org.junit.jupiter.api.Assertions.*;
-import com.jmc.mazebank.Models.Model;
-import com.jmc.mazebank.Models.Transaction;
-import com.jmc.mazebank.Models.Client;
-import com.jmc.mazebank.Models.Account;
+
+import com.jmc.mazebank.Models.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import javafx.scene.control.Label;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 import static org.mockito.Mockito.*;
@@ -32,8 +30,8 @@ class DashboardControllerTest {
     private Account mockCheckingAccount;
     private Account mockSavingsAccount;
     private ObservableList<Transaction> mockTransactions;
-
-   /* @BeforeAll
+/*
+    @BeforeAll
     static void initToolkit() {
         // Initialize the JavaFX toolkit
         Platform.startup(() -> {});
@@ -122,4 +120,93 @@ class DashboardControllerTest {
         assertEquals("5000.0", controller.savings_bal.getText());
         assertEquals("SAV12345", controller.savings_acc_num.getText());
     }
+    @Test
+    void testOnSendMoney() throws Exception {
+        // Arrange: Set up mock Model and DatabaseDriver
+        Model mockModel = mock(Model.class);
+        DatabaseDriver mockDatabaseDriver = mock(DatabaseDriver.class);
+        Client mockClient = mock(Client.class);
+        Account mockSavingsAccount = mock(Account.class);
+
+        when(mockModel.getDatabaseDriver()).thenReturn(mockDatabaseDriver);
+        when(mockModel.getClient()).thenReturn(mockClient);
+        when(mockClient.pAddressProperty()).thenReturn(new SimpleStringProperty("sender_address"));
+        when(mockClient.savingsAccountProperty()).thenReturn(new SimpleObjectProperty<>(mockSavingsAccount));
+        when(mockDatabaseDriver.searchClient("receiver_address")).thenReturn(mock(ResultSet.class));
+        when(mockDatabaseDriver.getSavingsAccountBalance("sender_address")).thenReturn(4000.0);
+
+        Model.setInstance(mockModel); // Set mock model instance
+
+        // Use real JavaFX fields for the test
+        controller.payee_fld = new TextField();
+        controller.amount_fld = new TextField();
+        controller.message_fld = new TextArea();
+
+        controller.payee_fld.setText("receiver_address");
+        controller.amount_fld.setText("1000");
+        controller.message_fld.setText("Test transaction");
+
+        // Mock ResultSet behavior
+        ResultSet mockResultSet = mock(ResultSet.class);
+        when(mockResultSet.isBeforeFirst()).thenReturn(true);
+        when(mockDatabaseDriver.searchClient("receiver_address")).thenReturn(mockResultSet);
+
+        // Act: Call the method under test
+        controller.onSendMoney();
+
+        // Assert: Verify interactions with the mocked objects
+        verify(mockDatabaseDriver, times(1)).searchClient("receiver_address");
+        verify(mockDatabaseDriver, times(1)).updateBalance("receiver_address", 1000.0, "ADD");
+        verify(mockDatabaseDriver, times(1)).updateBalance("sender_address", 1000.0, "SUB");
+        verify(mockDatabaseDriver, times(1)).newTransaction("sender_address", "receiver_address", 1000.0, "Test transaction");
+        verify(mockSavingsAccount, times(1)).setBalance(4000.0);
+
+        // Assert: Verify fields are cleared
+        assertEquals("", controller.payee_fld.getText());
+        assertEquals("", controller.amount_fld.getText());
+        assertEquals("", controller.message_fld.getText());
+    }
+/*
+    @Test
+    void testOnSendMoneyHandlesException() throws SQLException {
+        // Arrange
+        String receiver = "receiverName";
+        double amount = 100.0;
+        String message = "Test Transaction";
+
+        // Set up the necessary UI components with mock inputs
+        when(controller.payee_fld.getText()).thenReturn(receiver);
+        when(controller.amount_fld.getText()).thenReturn(String.valueOf(amount));
+        when(controller.message_fld.getText()).thenReturn(message);
+
+        // Mock the Model instance and the database driver
+        DatabaseDriver mockDatabaseDriver = Mockito.mock(DatabaseDriver.class);
+        Model mockModel = Mockito.mock(Model.class);
+        Model.setInstance(mockModel);
+        when(mockModel.getDatabaseDriver()).thenReturn(mockDatabaseDriver);
+
+        // Mock the client to return a sender's address
+        Client mockClient = Mockito.mock(Client.class);
+        when(mockModel.getClient()).thenReturn(mockClient);
+        when(mockClient.pAddressProperty().get()).thenReturn("senderAddress");
+
+        // Mock the ResultSet to throw an SQLException when isBeforeFirst() is called
+        ResultSet mockResultSet = Mockito.mock(ResultSet.class);
+        when(mockDatabaseDriver.searchClient(receiver)).thenReturn(mockResultSet);
+        when(mockResultSet.isBeforeFirst()).thenThrow(new SQLException("Test SQLException"));
+
+        // Act
+        controller.onSendMoney();
+
+        // Verify that the updateBalance methods are called, but they should not be reached due to the exception
+        verify(mockDatabaseDriver, never()).updateBalance(anyString(), anyDouble(), anyString());
+        verify(mockDatabaseDriver, never()).newTransaction(anyString(), anyString(), anyDouble(), anyString());
+
+        // Optionally, you can assert that the UI fields are cleared
+        assertEquals("", controller.payee_fld.getText());
+        assertEquals("", controller.amount_fld.getText());
+        assertEquals("", controller.message_fld.getText());
+    }
+*/
+
 }
