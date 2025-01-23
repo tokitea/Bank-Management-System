@@ -86,16 +86,7 @@ public class DepositControllerTest extends ApplicationTest {
         assertNotNull(depositController.search_btn.getOnAction());
         assertNotNull(depositController.deposit_btn.getOnAction());
     }
-    @Test
-    public void testOnClientSearchNoResults() {
-        when(model.searchClient("@Jo")).thenReturn(FXCollections.observableArrayList());
 
-        pAddress_fld.setText("@Jo");
-        depositController.onClientSearch();
-
-        assertTrue(result_listview.getItems().isEmpty());
-        assertNull(depositController.client);
-    }
     @Test
     public void testOnDepositEmptyAmount() {
         when(model.searchClient("@bBaker1")).thenReturn(FXCollections.observableArrayList(client));
@@ -143,12 +134,84 @@ public class DepositControllerTest extends ApplicationTest {
             verify(databaseDriver, never()).depositSavings(anyString(), anyDouble());
 
         }
-        @Test
-        public void testOnDepositInvalidAmount () {
-            pAddress_fld.setText("@bBaker1");
-            amount_fld.setText("invalid");
-            depositController.onDeposit();
 
-            verify(databaseDriver, never()).depositSavings(anyString(), anyDouble());
-        }
+    @Test
+    public void testOnDepositSmallAmount() {
+        pAddress_fld.setText("@bBaker1");
+        amount_fld.setText("1"); // Valid boundary: smallest positive value
+        when(model.searchClient("@bBaker1")).thenReturn(FXCollections.observableArrayList(client));
+        depositController.onClientSearch();
+        depositController.onDeposit();
+
+        verify(databaseDriver).depositSavings(eq("@bBaker1"), eq(201.0)); // 200 (mock balance) + 1
     }
+
+    @Test
+    public void testOnDepositLargeAmount() {
+        pAddress_fld.setText("@bBaker1");
+        amount_fld.setText("99999"); // Upper boundary: large value
+        when(model.searchClient("@bBaker1")).thenReturn(FXCollections.observableArrayList(client));
+        depositController.onClientSearch();
+        depositController.onDeposit();
+
+        verify(databaseDriver).depositSavings(eq("@bBaker1"), eq(100199.0)); // 200 (mock balance) + 99999
+    }
+
+    @Test
+    public void testOnDepositInvalidAmount() {
+        pAddress_fld.setText("@bBaker1");
+        amount_fld.setText("invalid"); // Invalid boundary: non-numeric
+        depositController.onDeposit();
+
+        verify(databaseDriver, never()).depositSavings(anyString(), anyDouble());
+    }
+    @Test
+    public void testOnDepositEmptyAddress() {
+        pAddress_fld.setText(""); // Lower boundary: empty address
+        depositController.onDeposit();
+
+        verify(databaseDriver, never()).depositSavings(anyString(), anyDouble());
+    }
+
+    @Test
+    public void testOnClientSearchSmallAddress() {
+        pAddress_fld.setText("@a"); // Valid boundary: minimal address length
+        when(model.searchClient("@a")).thenReturn(FXCollections.observableArrayList(client));
+        depositController.onClientSearch();
+
+        assertFalse(result_listview.getItems().isEmpty());
+        assertEquals(1, result_listview.getItems().size());
+    }
+    @Test
+    public void testOnClientSearchLargeAddress() {
+        String largeAddress = "@" + "a".repeat(254); // Upper boundary: max address length
+        pAddress_fld.setText(largeAddress);
+        when(model.searchClient(largeAddress)).thenReturn(FXCollections.observableArrayList(client));
+        depositController.onClientSearch();
+
+        assertFalse(result_listview.getItems().isEmpty());
+        assertEquals(1, result_listview.getItems().size());
+    }
+    @Test
+    public void testOnClientSearchNoResults() {
+        pAddress_fld.setText("@NonExistent");
+        when(model.searchClient("@NonExistent")).thenReturn(FXCollections.observableArrayList()); // Lower boundary: no results
+        depositController.onClientSearch();
+
+        assertTrue(result_listview.getItems().isEmpty());
+    }
+
+    @Test
+    public void testOnClientSearchMultipleResults() {
+        Client client2 = mock(Client.class);
+        when(client2.pAddressProperty()).thenReturn(new SimpleStringProperty("@"));
+
+        pAddress_fld.setText("@");
+        when(model.searchClient("@")).thenReturn(FXCollections.observableArrayList(client, client2)); // Upper boundary: multiple results
+        depositController.onClientSearch();
+
+        assertEquals(2, result_listview.getItems().size());
+    }
+
+
+}

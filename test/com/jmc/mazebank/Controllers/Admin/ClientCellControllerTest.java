@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.testfx.api.FxToolkit;
 
@@ -32,22 +33,26 @@ class ClientCellControllerTest {
     Account savingsAccount = new SavingsAccount("fName", "SAV67890", 1000, 400);
     LocalDate localDate = LocalDate.now();
 
+    @BeforeAll
 
+    public static void initToolkit() {
+
+        Platform.startup(() -> {});
+    }
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // Mock Client properties to return valid StringProperty
+
         when(mockClient.firstNameProperty()).thenReturn(new SimpleStringProperty("John"));
         when(mockClient.lastNameProperty()).thenReturn(new SimpleStringProperty("Doe"));
         when(mockClient.pAddressProperty()).thenReturn(new SimpleStringProperty("123 Main St"));
         when(mockClient.checkingAccountProperty()).thenReturn(new SimpleObjectProperty(checkingAccount.accountNumberProperty().get()));
         when(mockClient.savingsAccountProperty()).thenReturn(new SimpleObjectProperty(savingsAccount.accountNumberProperty().get()));
         when(mockClient.dateProperty()).thenReturn(new SimpleObjectProperty( localDate.toString()));
-        // Initialize the controller with mocked Client
+
         controller = new ClientCellController(mockClient);
 
-        // Mock Labels
 
         controller.fName_lbl = new Label();
         controller.lName_lbl = new Label();
@@ -61,7 +66,6 @@ class ClientCellControllerTest {
 
     @Test
     void testLabelBinding() {
-        // Verify label bindings
         assertEquals("John", controller.fName_lbl.getText());
         assertEquals("Doe", controller.lName_lbl.getText());
         assertEquals("123 Main St", controller.pAddress_lbl.getText());
@@ -72,11 +76,10 @@ class ClientCellControllerTest {
 
     @Test
     void testPropertyUpdateReflectsInLabels() {
-        // Simulate updating client properties
+
         when(mockClient.firstNameProperty()).thenReturn(new SimpleStringProperty("Jane"));
         when(mockClient.lastNameProperty()).thenReturn(new SimpleStringProperty("Smith"));
 
-        // Update the labels
         controller.initialize(null, null);
 
         assertEquals("Jane", controller.fName_lbl.getText());
@@ -101,10 +104,95 @@ class ClientCellControllerTest {
 
     @Test
     void testConstructorInitialization() {
-        // Verify client is correctly assigned
         assertNotNull(controller.client);
         assertEquals(mockClient, controller.client);
     }
+    @Test
+    void testEmptyStringClientProperties() {
+        when(mockClient.firstNameProperty()).thenReturn(new SimpleStringProperty(""));
+        when(mockClient.lastNameProperty()).thenReturn(new SimpleStringProperty(""));
+        when(mockClient.pAddressProperty()).thenReturn(new SimpleStringProperty(""));
+        when(mockClient.checkingAccountProperty()).thenReturn(new SimpleObjectProperty(""));
+        when(mockClient.savingsAccountProperty()).thenReturn(new SimpleObjectProperty(""));
+        when(mockClient.dateProperty()).thenReturn(new SimpleObjectProperty(""));
+
+        controller.initialize(null, null);
+
+        assertEquals("", controller.fName_lbl.getText());
+        assertEquals("", controller.lName_lbl.getText());
+        assertEquals("", controller.pAddress_lbl.getText());
+        assertEquals("", controller.ch_acc_lbl.getText());
+        assertEquals("", controller.sv_acc_lbl.getText());
+        assertEquals("", controller.date_lbl.getText());
+    }
+
+    @Test
+    void testVeryLongStringClientProperties() {
+        String longString = "A".repeat(1000); // Example: 1000 characters long
+        when(mockClient.firstNameProperty()).thenReturn(new SimpleStringProperty(longString));
+        when(mockClient.lastNameProperty()).thenReturn(new SimpleStringProperty(longString));
+        when(mockClient.pAddressProperty()).thenReturn(new SimpleStringProperty(longString));
+        when(mockClient.checkingAccountProperty()).thenReturn(new SimpleObjectProperty(longString));
+        when(mockClient.savingsAccountProperty()).thenReturn(new SimpleObjectProperty(longString));
+        when(mockClient.dateProperty()).thenReturn(new SimpleObjectProperty(longString));
+
+        controller.initialize(null, null);
+
+        assertEquals(longString, controller.fName_lbl.getText());
+        assertEquals(longString, controller.lName_lbl.getText());
+        assertEquals(longString, controller.pAddress_lbl.getText());
+        assertEquals(longString, controller.ch_acc_lbl.getText());
+        assertEquals(longString, controller.sv_acc_lbl.getText());
+        assertEquals(longString, controller.date_lbl.getText());
+    }
+
+    @Test
+    void testZeroAndNegativeBalanceAccounts() {
+        Account zeroBalanceAccount = new CheckingAccount("fName", "CHK00000", 0, 0);
+        Account negativeBalanceAccount = new SavingsAccount("fName", "SAV00001", -500, 0);
+
+        when(mockClient.checkingAccountProperty()).thenReturn(new SimpleObjectProperty(zeroBalanceAccount.accountNumberProperty().get()));
+        when(mockClient.savingsAccountProperty()).thenReturn(new SimpleObjectProperty(negativeBalanceAccount.accountNumberProperty().get()));
+
+        controller.initialize(null, null);
+
+        assertEquals(zeroBalanceAccount.accountNumberProperty().get(), controller.ch_acc_lbl.getText());
+        assertEquals(negativeBalanceAccount.accountNumberProperty().get(), controller.sv_acc_lbl.getText());
+    }
+
+    @Test
+    void testRapidPropertyUpdates() {
+        when(mockClient.firstNameProperty()).thenReturn(new SimpleStringProperty("John"));
+        when(mockClient.lastNameProperty()).thenReturn(new SimpleStringProperty("Doe"));
+
+        controller.initialize(null, null);
+
+        when(mockClient.firstNameProperty()).thenReturn(new SimpleStringProperty("Jane"));
+        when(mockClient.lastNameProperty()).thenReturn(new SimpleStringProperty("Smith"));
+
+        controller.initialize(null, null);
+
+        assertEquals("Jane", controller.fName_lbl.getText());
+        assertEquals("Smith", controller.lName_lbl.getText());
+    }
+    @Test
+    void testDateFormattingEdgeCases() {
+
+        when(mockClient.dateProperty()).thenReturn(new SimpleObjectProperty("2025-01-01"));
+        controller.initialize(null, null);
+        assertEquals("2025-01-01", controller.date_lbl.getText());
+
+
+        when(mockClient.dateProperty()).thenReturn(new SimpleObjectProperty("InvalidDate"));
+        controller.initialize(null, null);
+        assertEquals("InvalidDate", controller.date_lbl.getText());
+
+
+        when(mockClient.dateProperty()).thenReturn(new SimpleObjectProperty(""));
+        controller.initialize(null, null);
+        assertEquals("", controller.date_lbl.getText());
+    }
+
 
 
 }

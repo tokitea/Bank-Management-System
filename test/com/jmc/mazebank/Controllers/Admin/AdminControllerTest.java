@@ -16,6 +16,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeoutException;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -108,5 +110,74 @@ class AdminControllerTest {
         // Assert that the center node is updated correctly
         assertEquals(mockViewFactory.getCreateClientView(), mockAdminParent.getCenter());
     }
+    @Test
+    void testUpperBoundaryAdminMenuOptions() {
+        adminController.initialize(null, null);
+
+        // Set the menu item property to the last defined option
+        mockMenuItemProperty.set(AdminMenuOptions.DEPOSIT);
+
+        // Verify the correct view is loaded
+        assertEquals(mockViewFactory.getDepositView(), mockAdminParent.getCenter());
+    }
+    @Test
+    void testLowerBoundaryAdminMenuOptions() {
+        adminController.initialize(null, null);
+
+        // Set the menu item property to the first defined option
+        mockMenuItemProperty.set(AdminMenuOptions.CREATE_CLIENT);
+
+        // Verify the correct view is loaded
+        assertEquals(mockViewFactory.getCreateClientView(), mockAdminParent.getCenter());
+    }
+
+    @Test
+    void testNullValueAdminMenuOptions() {
+        adminController.initialize(null, null);
+
+        // Set the menu item property to null
+        mockMenuItemProperty.set(null);
+
+        // Verify that no change is made to the center node
+        assertNull(mockAdminParent.getCenter());
+    }
+
+    @Test
+    void testAllEnumValuesAdminMenuOptions() {
+        adminController.initialize(null, null);
+
+        for (AdminMenuOptions option : AdminMenuOptions.values()) {
+            mockMenuItemProperty.set(option);
+
+            switch (option) {
+                case CREATE_CLIENT:
+                    assertEquals(mockViewFactory.getCreateClientView(), mockAdminParent.getCenter());
+                    break;
+                case CLIENTS:
+                    assertEquals(mockViewFactory.getClientsView(), mockAdminParent.getCenter());
+                    break;
+                case DEPOSIT:
+                    assertEquals(mockViewFactory.getDepositView(), mockAdminParent.getCenter());
+                    break;
+                default:
+                    fail("Unhandled AdminMenuOptions value: " + option);
+            }
+        }
+    }
+    @Test
+    void testRapidUpdatesAdminMenuOptions() {
+        adminController.initialize(null, null);
+
+        // Simulate rapid updates
+        mockMenuItemProperty.set(AdminMenuOptions.CLIENTS);
+        assertEquals(mockViewFactory.getClientsView(), mockAdminParent.getCenter());
+
+        mockMenuItemProperty.set(AdminMenuOptions.DEPOSIT);
+        assertEquals(mockViewFactory.getDepositView(), mockAdminParent.getCenter());
+
+        mockMenuItemProperty.set(AdminMenuOptions.CREATE_CLIENT);
+        assertEquals(mockViewFactory.getCreateClientView(), mockAdminParent.getCenter());
+    }
+
 
 }

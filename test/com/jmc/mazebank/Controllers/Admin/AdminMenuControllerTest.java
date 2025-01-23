@@ -31,10 +31,10 @@ class AdminMenuControllerTest extends ApplicationTest {
     private ViewFactory mockViewFactory;
     private ObjectProperty<AdminMenuOptions> selectedMenuItem;
 
-    /*@BeforeAll
+    @BeforeAll
     public static void initToolkit() {
         Platform.startup(() -> {});
-    }*/
+    }
 
     @BeforeEach
     void setUp() {
@@ -100,6 +100,38 @@ class AdminMenuControllerTest extends ApplicationTest {
         verify(mockViewFactory).showLoginWindow();
         verify(mockModel).setAdminLoginSuccessFlag(false);
     }
+    @Test
+    void testBoundaryOnCreateClient() {
+
+        selectedMenuItem.set(null);
+        controller.onCreateClient();
+        assertEquals(AdminMenuOptions.CREATE_CLIENT, selectedMenuItem.get());
+    }
+
+    @Test
+    void testBoundaryOnClients() {
+
+        selectedMenuItem.set(AdminMenuOptions.CREATE_CLIENT);
+        controller.onClients();
+        assertEquals(AdminMenuOptions.CLIENTS, selectedMenuItem.get());
+    }
+
+    @Test
+    void testBoundaryOnDeposit() {
+
+        selectedMenuItem.set(AdminMenuOptions.CLIENTS);
+        controller.onDeposit();
+        assertEquals(AdminMenuOptions.DEPOSIT, selectedMenuItem.get());
+    }
+
+    @Test
+    void testNoChangeWhenAlreadySet() {
+
+        selectedMenuItem.set(AdminMenuOptions.DEPOSIT);
+        controller.onDeposit();
+        assertEquals(AdminMenuOptions.DEPOSIT, selectedMenuItem.get());
+    }
+
 
 
 }

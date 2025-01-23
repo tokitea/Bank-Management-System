@@ -1,6 +1,12 @@
 package com.jmc.mazebank.Models;
 
+import com.jmc.mazebank.Controllers.LoginController;
+import com.jmc.mazebank.Views.AccountType;
 import javafx.application.Platform;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +16,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class CheckingAccountTest {
 
     private CheckingAccount checkingAccount;
+    private LoginController controller;
 
+    private ChoiceBox<AccountType> acc_selector;
+    private Label payee_address_lbl;
+    private TextField payee_address_fld;
+    private TextField password_fld;
+    private Button login_btn;
+    private Label error_lbl;
     @BeforeEach
     void setUp() {
         checkingAccount = new CheckingAccount("John Doe", "1234567890", 1000.00, 5);
@@ -40,4 +53,7 @@ class CheckingAccountTest {
         checkingAccount.transactionLimitProp().set(3);
         assertEquals(3, checkingAccount.transactionLimitProp().get());
     }
+
+
+
 }

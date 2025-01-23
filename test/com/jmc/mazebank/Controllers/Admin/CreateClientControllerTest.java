@@ -26,11 +26,11 @@ class CreateClientControllerTest {
     private CreateClientController controller;
     private DatabaseDriver mockDatabaseDriver;
 
-    /*@BeforeAll
+    @BeforeAll
     static void initToolkit() {
         // Initialize the JavaFX toolkit
         Platform.startup(() -> {});
-    }*/
+    }
 
     @BeforeEach
     void setUp() {
@@ -511,6 +511,120 @@ void testCreateAccountInvalidAmountSpecialCharacters() throws InterruptedExcepti
 
         assertTrue(latch.await(1, TimeUnit.SECONDS), "The JavaFX task did not complete in time.");
     }
+
+    @Test
+    void testFirstNameOneCharacter() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Platform.runLater(() -> {
+            try {
+                controller.fName_fld.setText("A"); // Minimum valid length
+                controller.lName_fld.setText("Doe");
+                controller.password_fld.setText("ValidPassword123");
+
+                controller.createClient();
+
+                assertEquals("Client Created Successfully!", controller.error_lbl.getText());
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        assertTrue(latch.await(1, TimeUnit.SECONDS), "The JavaFX task did not complete in time.");
+    }
+    @Test
+    void testPasswordMinimumLength() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Platform.runLater(() -> {
+            try {
+                controller.fName_fld.setText("John");
+                controller.lName_fld.setText("Doe");
+                controller.password_fld.setText("12345678"); // Minimum valid password
+
+                controller.createClient();
+
+                assertEquals("Client Created Successfully!", controller.error_lbl.getText());
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        assertTrue(latch.await(1, TimeUnit.SECONDS), "The JavaFX task did not complete in time.");
+    }
+    @Test
+    void testCreateAccountMinimumValidAmount() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Platform.runLater(() -> {
+            try {
+                controller.ch_amount_fld.setText("0.01"); // Minimum valid amount
+                controller.error_lbl.setText(""); // Clear any previous error messages
+
+                controller.createAccount("Checking");
+
+                assertNotEquals("Error", controller.error_lbl.getText()); // Ensure no error
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        assertTrue(latch.await(1, TimeUnit.SECONDS), "The JavaFX task did not complete in time.");
+    }
+
+    @Test
+    void testCreateAccountNegativeAmount() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Platform.runLater(() -> {
+            try {
+                controller.ch_amount_fld.setText("-0.01"); // Invalid negative amount
+                controller.error_lbl.setText(""); // Clear any previous error messages
+
+                controller.createAccount("Checking");
+
+                assertEquals("Error: Amount must be positive!", controller.error_lbl.getText());
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        assertTrue(latch.await(1, TimeUnit.SECONDS), "The JavaFX task did not complete in time.");
+    }
+
+    @Test
+    void testCreatePayeeAddressMaxClientId() {
+        when(mockDatabaseDriver.getLastClientsId()).thenReturn(Integer.MAX_VALUE);
+        controller.fName_fld.setText("Max");
+        controller.lName_fld.setText("Payne");
+
+        String payeeAddress = controller.createPayeeAddress();
+
+        assertEquals("@mPayne2147483648", payeeAddress);
+    }
+
+    @Test
+    void testLastNameOneCharacter() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Platform.runLater(() -> {
+            try {
+                controller.fName_fld.setText("John");
+                controller.lName_fld.setText("D"); // Minimum valid last name
+                controller.password_fld.setText("ValidPassword123");
+
+                controller.createClient();
+
+                assertEquals("Client Created Successfully!", controller.error_lbl.getText());
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        assertTrue(latch.await(1, TimeUnit.SECONDS), "The JavaFX task did not complete in time.");
+    }
+
+
 
 
 

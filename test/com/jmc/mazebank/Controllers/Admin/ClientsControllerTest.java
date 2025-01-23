@@ -22,12 +22,12 @@ class ClientsControllerTest {
     private ClientsController controller;
     private Model mockModel;
     private ObservableList<Client> mockClients;
-    //@BeforeAll
-    /*
+    @BeforeAll
+
     public static void initToolkit() {
         // Start the JavaFX toolkit
         Platform.startup(() -> {});
-    }*/
+    }
     @BeforeEach
     void setUp() {
         controller = new ClientsController();
@@ -75,4 +75,50 @@ class ClientsControllerTest {
 
         verify(mockModel, never()).setClients();
     }
+    @Test
+    void testInitClientsListWithOneClient() {
+        Account checkingAccount = new CheckingAccount("TestFirst", "CHK123", 1500, 500);
+        Account savingsAccount = new SavingsAccount("TestFirst", "SAV456", 1000, 400);
+        ObservableList<Client> singleClient = FXCollections.observableArrayList(
+                new Client("TestFirst", "TestLast", "TestAddress", checkingAccount, savingsAccount, LocalDate.now())
+        );
+
+        when(mockModel.getClients()).thenReturn(singleClient);
+
+        controller.initialize(null, null);
+
+        assertEquals(singleClient, controller.clients_listview.getItems());
+    }
+
+    @Test
+    void testInitClientsListWithManyClients() {
+        ObservableList<Client> manyClients = FXCollections.observableArrayList();
+        for (int i = 0; i < 1000; i++) {
+            Account checkingAccount = new CheckingAccount("Client" + i, "CHK" + i, 1000 + i, 500);
+            Account savingsAccount = new SavingsAccount("Client" + i, "SAV" + i, 500 + i, 300);
+            manyClients.add(new Client("FirstName" + i, "LastName" + i, "Address" + i, checkingAccount, savingsAccount, LocalDate.now()));
+        }
+
+        when(mockModel.getClients()).thenReturn(manyClients);
+
+        controller.initialize(null, null);
+
+        assertEquals(manyClients, controller.clients_listview.getItems());
+    }
+
+    @Test
+    void testInitClientsListWithNullAttributes() {
+        Account checkingAccount = new CheckingAccount(null, null, 0, 0);
+        Account savingsAccount = new SavingsAccount(null, null, 0, 0);
+        ObservableList<Client> clientsWithNulls = FXCollections.observableArrayList(
+                new Client(null, null, null, checkingAccount, savingsAccount, null)
+        );
+
+        when(mockModel.getClients()).thenReturn(clientsWithNulls);
+
+        controller.initialize(null, null);
+
+        assertEquals(clientsWithNulls, controller.clients_listview.getItems());
+    }
+
 }

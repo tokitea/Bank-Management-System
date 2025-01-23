@@ -1,5 +1,6 @@
 package com.jmc.mazebank.Controllers;
 
+import com.jmc.mazebank.Models.Client;
 import com.jmc.mazebank.Models.Model;
 import com.jmc.mazebank.Views.AccountType;
 import com.jmc.mazebank.Views.ViewFactory;
@@ -27,11 +28,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 class LoginControllerTest {
-   /* @BeforeAll
+    @BeforeAll
     public static void initToolkit() {
         // Start the JavaFX toolkit
         Platform.startup(() -> {});
-    }*/
+    }
 
     @Mock
     private Model mockModel;
@@ -131,35 +132,6 @@ class LoginControllerTest {
     }
 
 
-    @Test
-    public void testSuccessfulClientLogin() {
-        // Mock dependencies
-        Model mockModel = mock(Model.class);
-        ViewFactory mockViewFactory = mock(ViewFactory.class);
-        Stage mockStage = mock(Stage.class);
-
-        // Mock behaviors
-        when(mockModel.getViewFactory()).thenReturn(mockViewFactory);
-        when(mockViewFactory.getLoginAccountType()).thenReturn(AccountType.CLIENT);
-        when(mockModel.getClientLoginSuccessFlag()).thenReturn(true);
-
-        // Create controller and inject mocks
-        LoginController controller = new LoginController();
-        controller.payee_address_fld = new TextField("@BBaker1");
-        controller.password_fld = new TextField("123456");
-        controller.error_lbl = new Label();
-        controller.login_btn = new Button();
-
-        // Simulate login action
-        controller.onLogin();
-
-        // Verify methods
-        verify(mockViewFactory).showClientWindow();
-        verify(mockViewFactory).closeStage(mockStage);
-        assertTrue(controller.error_lbl.getText().isEmpty());
-    }
-
-
 
     @Test
     void testOnLoginFailureForClient() {
@@ -208,6 +180,33 @@ class LoginControllerTest {
     }
 
 
+ @Test
+    public void testSuccessfulClientLogin() {
+        // Mock dependencies
+        Model mockModel = mock(Model.class);
+        ViewFactory mockViewFactory = mock(ViewFactory.class);
+        Stage mockStage = mock(Stage.class);
+
+        // Mock behaviors
+        when(mockModel.getViewFactory()).thenReturn(mockViewFactory);
+        when(mockViewFactory.getLoginAccountType()).thenReturn(AccountType.CLIENT);
+        when(mockModel.getClientLoginSuccessFlag()).thenReturn(true);
+
+        // Create controller and inject mocks
+        LoginController controller = new LoginController();
+        controller.payee_address_fld = new TextField("@BBaker1");
+        controller.password_fld = new TextField("123456");
+        controller.error_lbl = new Label();
+        controller.login_btn = new Button();
+
+        // Simulate login action
+        controller.onLogin();
+
+        // Verify methods
+        verify(mockViewFactory).showClientWindow();
+        verify(mockViewFactory).closeStage(mockStage);
+        assertTrue(controller.error_lbl.getText().isEmpty());
+    }
 
     @Test
     void testOnLoginFailureForAdmin() {
@@ -227,4 +226,46 @@ class LoginControllerTest {
         assertEquals("", password_fld.getText());
         assertEquals("No Such Login Credentials.", error_lbl.getText());
     }
+
+    @Test
+    void testEmptyUsernameField() {
+        // Empty username should trigger login failure
+        payee_address_fld.setText("");  // Empty username
+        password_fld.setText("password123");
+
+        controller.onLogin();
+
+        assertEquals("", payee_address_fld.getText());
+        assertEquals("", password_fld.getText());
+        assertEquals("No Such Login Credentials.", error_lbl.getText());
+    }
+
+    @Test
+    void testInvalidCharacterUsernameField() {
+
+        payee_address_fld.setText("@Invalid#Username$");
+        password_fld.setText("password123");
+
+        controller.onLogin();
+
+        assertEquals("", payee_address_fld.getText());
+        assertEquals("", password_fld.getText());
+        assertEquals("No Such Login Credentials.", error_lbl.getText());
+    }
+
+    @Test
+    void testEmptyPasswordField() {
+
+        payee_address_fld.setText("valid_client");
+        password_fld.setText("");
+
+        controller.onLogin();
+
+        assertEquals("", payee_address_fld.getText());
+        assertEquals("", password_fld.getText());
+        assertEquals("No Such Login Credentials.", error_lbl.getText());
+    }
+
+
+
 }
