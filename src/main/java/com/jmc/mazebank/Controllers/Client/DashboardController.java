@@ -50,7 +50,7 @@ public class   DashboardController implements Initializable {
         if (Model.getInstance().getLatestTransactions().isEmpty()){
             Model.getInstance().setLatestTransactions();
         }
-    }
+    }  //mir hajde me shiko pak databazen okej mis orkida
 
     protected void onSendMoney() {
         String receiver = payee_fld.getText();

@@ -64,6 +64,14 @@ public class Model {
         model=mockModel;
     }
 
+    public static void resetInstance() {
+
+
+            model = null;
+
+
+    }
+
 
     public ViewFactory getViewFactory() {
         return viewFactory;

@@ -87,13 +87,20 @@ public void createClient() {
 
 
     //create checking or savings accounts with appropriate account numbers and balance
-    public void createAccount(String accountType) {
+   /* public void createAccount(String accountType) {
         // Check if the amount field is empty
         String amountText = ch_amount_fld.getText();
         if (amountText.isEmpty()) {
             // Handle the error case
             error_lbl.setText("Error: Amount cannot be empty!");
             return; // Exit the method to prevent further execution
+        }
+        double amount = Double.parseDouble(amountText);
+
+        // Check if the amount is valid
+        if (amount <= 0) {
+            error_lbl.setText("Error: Amount must be positive!");
+            return;
         }
 
         double balance;
@@ -117,6 +124,46 @@ public void createClient() {
             Model.getInstance().getDatabaseDriver().createSavingsAccount(payeeAddress, accountNumber, 2000, balance);
         }
     }
+*/
+    public void createAccount(String accountType) {
+        // Check if the amount field is empty
+        String amountText = ch_amount_fld.getText();
+        if (amountText.isEmpty()) {
+            error_lbl.setText("Error: Amount cannot be empty!");
+            return;
+        }
+
+        double balance;
+        try {
+            balance = Double.parseDouble(amountText);
+        } catch (NumberFormatException e) {
+            error_lbl.setText("Error: Please enter a valid amount!");
+            return;
+        }
+
+        // Check if the amount is valid
+        if (balance <= 0) {
+            error_lbl.setText("Error: Amount must be positive!");
+            return;
+        }
+
+        // Ensure payeeAddress is set
+        if (payeeAddress == null || payeeAddress.isEmpty()) {
+            payeeAddress = createPayeeAddress(); // Generate the payee address if not already set
+        }
+
+        // Generate Account Number
+        String firstSection = "3201";
+        String lastSection = Integer.toString((new Random()).nextInt(9999) + 1000);
+        String accountNumber = firstSection + " " + lastSection;
+
+        // Create the checking or savings account
+        if (accountType.equals("Checking")) {
+            Model.getInstance().getDatabaseDriver().createCheckingAccount(payeeAddress, accountNumber, 10, balance);
+        } else if (accountType.equals("Savings")) {
+            Model.getInstance().getDatabaseDriver().createSavingsAccount(payeeAddress, accountNumber, 2000, balance);
+        }
+    }
 
 
     //updates the paddressLbl when the payee address is created
@@ -131,7 +178,7 @@ public void createClient() {
     }
    //generates a payee address based on the clint's first name last name and ID
    protected String createPayeeAddress() {
-       long id = (long)Model.getInstance().getDatabaseDriver().getLastClientsId() ;
+       long id = Model.getInstance().getDatabaseDriver().getLastClientsId() ;
        if (id < 0) {
            throw new IllegalArgumentException("Client ID cannot be negative");
        }

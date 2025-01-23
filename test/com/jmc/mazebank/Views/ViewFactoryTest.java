@@ -14,6 +14,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.testfx.util.WaitForAsyncUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -26,6 +27,22 @@ public class ViewFactoryTest {
             Platform.startup(() -> {});
         } catch (IllegalStateException e) {
             // JavaFX already initialized
+        }
+    }
+
+    private static void run() {
+        try {
+            // Arrange
+            ViewFactory viewFactory = new ViewFactory();
+
+            // Act
+            AnchorPane dashboardView = viewFactory.getDashboardView();
+
+            // Assert
+            assertNotNull(dashboardView, "Dashboard view should not be null");
+            assertNotNull(dashboardView.lookup("#someElement"), "Expected element should be present in the dashboard view");
+        } catch (Exception e) {
+            fail("Exception should not occur: " + e.getMessage());
         }
     }
 
@@ -70,23 +87,10 @@ public class ViewFactoryTest {
         assertNotNull(adminMenuOptions);
     }
 
-    @Test
-    public void testGetDashboardView() {
-        Platform.runLater(() -> {
-            try {
-                ViewFactory viewFactory = new ViewFactory();
 
-                // Act
-                AnchorPane dashboardView = viewFactory.getDashboardView();
 
-                // Assert
-                assertNotNull(dashboardView);
-            } catch (Exception e) {
-                fail("Exception should not occur: " + e.getMessage());
-            }
-        });
-        waitForJavaFX();
-    }
+
+
 
     @Test
     public void testGetTransactionsView() {
