@@ -58,19 +58,28 @@ public class   DashboardController implements Initializable {
         String message = message_fld.getText();
         String sender = Model.getInstance().getClient().pAddressProperty().get();
         ResultSet resultSet = Model.getInstance().getDatabaseDriver().searchClient(receiver);
+
         try {
-            if (resultSet.isBeforeFirst()){
+            if (resultSet.isBeforeFirst()) {
                 Model.getInstance().getDatabaseDriver().updateBalance(receiver, amount, "ADD");
             }
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the exception
+            // Optionally, you can show an error message to the user here
         }
-        // Subtract from sender's savings account
-        Model.getInstance().getDatabaseDriver().updateBalance(sender, amount, "SUB");
-        // Update the savings account balance in the client object
-        Model.getInstance().getClient().savingsAccountProperty().get().setBalance(Model.getInstance().getDatabaseDriver().getSavingsAccountBalance(sender));
-        // Record new transaction
-        Model.getInstance().getDatabaseDriver().newTransaction(sender, receiver, amount, message);
+
+        try {
+            // Subtract from sender's savings account
+            Model.getInstance().getDatabaseDriver().updateBalance(sender, amount, "SUB");
+            // Update the savings account balance in the client object
+            Model.getInstance().getClient().savingsAccountProperty().get().setBalance(Model.getInstance().getDatabaseDriver().getSavingsAccountBalance(sender));
+            // Record new transaction
+            Model.getInstance().getDatabaseDriver().newTransaction(sender, receiver, amount, message);
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the exception
+            // Optionally, you can show an error message to the user here
+        }
+
         // Clear the fields
         payee_fld.setText("");
         amount_fld.setText("");

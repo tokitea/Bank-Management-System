@@ -39,14 +39,10 @@ public class CreateClientController implements Initializable {
             }
         });
         ch_acc_box.selectedProperty().addListener((observableValue, oldVal, newVal) -> {
-            if (newVal){
-                createCheckingAccountFlag = true;
-            }
+            if (newVal){createCheckingAccountFlag = true;}
         });
         sv_acc_box.selectedProperty().addListener((observableValue, oldVal, newVal) -> {
-            if (newVal){
-                createSavingsAccountFlag = true;
-            }
+            if (newVal){createSavingsAccountFlag = true;}
         });
     }
 //client creation and account setup
@@ -156,7 +152,7 @@ public void createClient() {
    }
 
     //clears all fields and resets controls to their default state
-    private void emptyFields() {
+    public void emptyFields() {
         fName_fld.setText("");
         lName_fld.setText("");
         password_fld.setText("");

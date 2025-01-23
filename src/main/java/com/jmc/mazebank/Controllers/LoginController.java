@@ -33,23 +33,28 @@ public class LoginController implements Initializable {
     }
     public void onLogin() {
         if (Model.getInstance().getViewFactory().getLoginAccountType() == AccountType.CLIENT) {
+            // Evaluate Client Login Credentials
             Model.getInstance().evaluateClientCred(payee_address_fld.getText(), password_fld.getText());
             if (Model.getInstance().getClientLoginSuccessFlag()) {
-                Model.getInstance().getViewFactory().showClientWindow(); // Open client window
+                // If credentials are valid, show client window
+                Model.getInstance().getViewFactory().showClientWindow();
                 closeCurrentWindow(); // Close login window
             } else {
-                handleLoginError();
+                handleLoginError(); // Show error message and clear fields
             }
         } else {
+            // Evaluate Admin Login Credentials
             Model.getInstance().evaluateAdminCred(payee_address_fld.getText(), password_fld.getText());
             if (Model.getInstance().getAdminLoginSuccessFlag()) {
-                Model.getInstance().getViewFactory().showAdminWindow(); // Open admin window
+                // If credentials are valid, show admin window
+                Model.getInstance().getViewFactory().showAdminWindow();
                 closeCurrentWindow(); // Close login window
             } else {
-                handleLoginError();
+                handleLoginError(); // Show error message and clear fields
             }
         }
     }
+
     private void closeCurrentWindow() {
         login_btn.getScene().getWindow().hide(); // Hide the current window
     }
