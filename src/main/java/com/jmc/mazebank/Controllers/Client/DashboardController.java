@@ -10,6 +10,7 @@ import javafx.scene.text.Text;
 
 import java.net.URL;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
@@ -46,13 +47,13 @@ public class   DashboardController implements Initializable {
         savings_acc_num.textProperty().bind(Model.getInstance().getClient().savingsAccountProperty().get().accountNumberProperty());
     }
 
-    protected void initLatestTransactionsList() {
+    protected void initLatestTransactionsList()  {
         if (Model.getInstance().getLatestTransactions().isEmpty()){
             Model.getInstance().setLatestTransactions();
         }
     }
 
-    private void onSendMoney() {
+    protected void onSendMoney() {
         String receiver = payee_fld.getText();
         double amount = Double.parseDouble(amount_fld.getText());
         String message = message_fld.getText();

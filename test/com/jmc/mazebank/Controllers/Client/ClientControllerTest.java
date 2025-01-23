@@ -21,15 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 class ClientControllerTest {
-    @BeforeAll
-    static void initializeJavaFX() throws TimeoutException {
-        FxToolkit.registerPrimaryStage();
-    }
 
-    @AfterEach
-    void cleanupJavaFX() throws TimeoutException {
-        FxToolkit.cleanupStages();
-    }
     @Mock
     private Model mockModel;
 
