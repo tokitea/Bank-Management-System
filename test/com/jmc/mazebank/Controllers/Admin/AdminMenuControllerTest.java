@@ -30,12 +30,12 @@ class AdminMenuControllerTest extends ApplicationTest {
     private Model mockModel;
     private ViewFactory mockViewFactory;
     private ObjectProperty<AdminMenuOptions> selectedMenuItem;
-
+ /*
     @BeforeAll
     public static void initToolkit() {
         Platform.startup(() -> {});
     }
-
+*/
     @BeforeEach
     void setUp() {
 

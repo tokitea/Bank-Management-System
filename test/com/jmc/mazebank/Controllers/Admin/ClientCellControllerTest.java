@@ -32,13 +32,13 @@ class ClientCellControllerTest {
     Account checkingAccount = new CheckingAccount("fName", "CHK12345", 15000, 500);
     Account savingsAccount = new SavingsAccount("fName", "SAV67890", 1000, 400);
     LocalDate localDate = LocalDate.now();
-
+/*
     @BeforeAll
 
     public static void initToolkit() {
 
         Platform.startup(() -> {});
-    }
+    }*/
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
