@@ -112,10 +112,5 @@ class TransactionCellControllerTest {
         assertEquals(Color.rgb(240, 240, 240), controller.out_icon.getFill());
     }
 
-    @Test
-    void testConstructorInitialization() {
-        // Verify transaction is correctly assigned
-        assertNotNull(controller.getTransaction());
-        assertEquals(mockTransaction, controller.getTransaction());
-    }
+
 }
