@@ -30,17 +30,18 @@ class DashboardControllerTest {
     private Account mockCheckingAccount;
     private Account mockSavingsAccount;
     private ObservableList<Transaction> mockTransactions;
-/*
+
     @BeforeAll
     static void initToolkit() {
         // Initialize the JavaFX toolkit
         Platform.startup(() -> {});
-    }*/
+    }
 
     @BeforeEach
     void setUp(){
         // Mock the DashboardController
         controller = Mockito.mock(DashboardController.class);
+
 
         // Mock Model class (Singleton)
         mockModel = Mockito.mock(Model.class);
@@ -166,47 +167,101 @@ class DashboardControllerTest {
         assertEquals("", controller.amount_fld.getText());
         assertEquals("", controller.message_fld.getText());
     }
-/*
+    /*
     @Test
-    void testOnSendMoneyHandlesException() throws SQLException {
-        // Arrange
-        String receiver = "receiverName";
-        double amount = 100.0;
-        String message = "Test Transaction";
+    void testOnSendMoneyHandlesException() throws Exception {
+        // Arrange: Set up mock Model and DatabaseDriver
+        Model mockModel = mock(Model.class);
+        DatabaseDriver mockDatabaseDriver = mock(DatabaseDriver.class);
 
-        // Set up the necessary UI components with mock inputs
-        when(controller.payee_fld.getText()).thenReturn(receiver);
-        when(controller.amount_fld.getText()).thenReturn(String.valueOf(amount));
-        when(controller.message_fld.getText()).thenReturn(message);
+        Client mockClient = mock(Client.class);
+        Account mockSavingsAccount = mock(Account.class);
 
-        // Mock the Model instance and the database driver
-        DatabaseDriver mockDatabaseDriver = Mockito.mock(DatabaseDriver.class);
-        Model mockModel = Mockito.mock(Model.class);
+        // Set up Model instance
         Model.setInstance(mockModel);
         when(mockModel.getDatabaseDriver()).thenReturn(mockDatabaseDriver);
-
-        // Mock the client to return a sender's address
-        Client mockClient = Mockito.mock(Client.class);
         when(mockModel.getClient()).thenReturn(mockClient);
-        when(mockClient.pAddressProperty().get()).thenReturn("senderAddress");
 
-        // Mock the ResultSet to throw an SQLException when isBeforeFirst() is called
-        ResultSet mockResultSet = Mockito.mock(ResultSet.class);
-        when(mockDatabaseDriver.searchClient(receiver)).thenReturn(mockResultSet);
-        when(mockResultSet.isBeforeFirst()).thenThrow(new SQLException("Test SQLException"));
+        // Set up client and account properties
+        when(mockClient.pAddressProperty()).thenReturn(new SimpleStringProperty("sender_address"));
+        when(mockClient.savingsAccountProperty()).thenReturn(new SimpleObjectProperty<>(mockSavingsAccount));
 
-        // Act
-        controller.onSendMoney();
+        // Mock ResultSet behavior
+        ResultSet mockResultSet = mock(ResultSet.class);
+        when(mockDatabaseDriver.searchClient("receiver_address")).thenReturn(mockResultSet);
+        when(mockResultSet.isBeforeFirst()).thenReturn(true); // Simulate a valid receiver
 
-        // Verify that the updateBalance methods are called, but they should not be reached due to the exception
-        verify(mockDatabaseDriver, never()).updateBalance(anyString(), anyDouble(), anyString());
-        verify(mockDatabaseDriver, never()).newTransaction(anyString(), anyString(), anyDouble(), anyString());
+        // Simulate an exception when updating the receiver's balance
+        doThrow(new RuntimeException("Database error")).when(mockDatabaseDriver).updateBalance("receiver_address", 1000.0, "ADD");
 
-        // Optionally, you can assert that the UI fields are cleared
+        // Set up the real controller
+        DashboardController controller = new DashboardController();
+        controller.payee_fld = new TextField();
+        controller.amount_fld = new TextField();
+        controller.message_fld = new TextArea();
+
+        // Initialize fields
+        controller.payee_fld.setText("receiver_address");
+        controller.amount_fld.setText("1000");
+        controller.message_fld.setText("Test transaction");
+
+        // Act: Call the method under test
+        try {
+            controller.onSendMoney();
+        } catch (Exception e) {
+            fail("The exception should have been handled within the method: " + e.getMessage());
+        }
+
+        // Assert: Verify that the exception was handled gracefully
+        verify(mockDatabaseDriver, times(1)).searchClient("receiver_address");
+        verify(mockDatabaseDriver, times(1)).updateBalance("receiver_address", 1000.0, "ADD");
+        verify(mockDatabaseDriver, never()).updateBalance("sender_address", 1000.0, "SUB"); // Sender balance update shouldn't happen due to exception
+
+        // Assert: Verify the input fields are cleared
         assertEquals("", controller.payee_fld.getText());
         assertEquals("", controller.amount_fld.getText());
         assertEquals("", controller.message_fld.getText());
     }
 */
+
+    @Test
+    void testAccountSummary() {
+        // Arrange: Set up mock Model and Transactions
+        Model mockModel = mock(Model.class);
+        Client mockClient = mock(Client.class);
+        Transaction mockTransaction1 = mock(Transaction.class);
+        Transaction mockTransaction2 = mock(Transaction.class);
+        ObservableList<Transaction> mockTransactions = FXCollections.observableArrayList();
+
+        // Set up the transactions
+        when(mockTransaction1.senderProperty()).thenReturn(new SimpleStringProperty("sender_address"));
+        when(mockTransaction1.amountProperty()).thenReturn(new SimpleDoubleProperty(500.0));
+        when(mockTransaction2.senderProperty()).thenReturn(new SimpleStringProperty("receiver_address"));
+        when(mockTransaction2.amountProperty()).thenReturn(new SimpleDoubleProperty(300.0));
+
+        // Add transactions to the mock list
+        mockTransactions.add(mockTransaction1); // This will count as an expense
+        mockTransactions.add(mockTransaction2); // This will count as income
+
+        // Mock the Model's behavior
+        when(mockModel.getAllTransactions()).thenReturn(mockTransactions);
+        when(mockModel.getClient()).thenReturn(mockClient);
+        when(mockClient.pAddressProperty()).thenReturn(new SimpleStringProperty("sender_address"));
+
+        // Set the mock Model instance
+        Model.setInstance(mockModel);
+
+        // Initialize the DashboardController and set the labels
+        DashboardController controller = new DashboardController();
+        controller.income_lbl = new Label();
+        controller.expense_lbl = new Label();
+
+        // Act: Call the method under test
+        controller.accountSummary();
+
+        // Assert: Verify the income and expenses labels are updated correctly
+        assertEquals("+ $300.0", controller.income_lbl.getText(), "Income should be $300.0");
+        assertEquals("- $500.0", controller.expense_lbl.getText(), "Expenses should be $500.0");
+    }
 
 }

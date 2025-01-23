@@ -10,7 +10,6 @@ import javafx.scene.text.Text;
 
 import java.net.URL;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
@@ -47,7 +46,7 @@ public class   DashboardController implements Initializable {
         savings_acc_num.textProperty().bind(Model.getInstance().getClient().savingsAccountProperty().get().accountNumberProperty());
     }
 
-    protected void initLatestTransactionsList()  {
+    protected void initLatestTransactionsList() {
         if (Model.getInstance().getLatestTransactions().isEmpty()){
             Model.getInstance().setLatestTransactions();
         }
@@ -79,13 +78,15 @@ public class   DashboardController implements Initializable {
     }
 
     // Method calculates all expenses and income
-    private void accountSummary() {
+    protected void accountSummary() {
         double income = 0;
         double expenses = 0;
         if (Model.getInstance().getAllTransactions().isEmpty()){
             Model.getInstance().setAllTransactions();
         }
+        System.out.println("Jmei ktu ");
         for (Transaction transaction: Model.getInstance().getAllTransactions()) {
+            System.out.println("Jemi ktu 2");
             if (transaction.senderProperty().get().equals(Model.getInstance().getClient().pAddressProperty().get())){
                 expenses = expenses + transaction.amountProperty().get();
             } else {
