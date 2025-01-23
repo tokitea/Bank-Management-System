@@ -21,7 +21,6 @@ import com.jmc.mazebank.Models.DatabaseDriver;
 import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit5.ApplicationTest;
 
-import java.sql.SQLException;
 import java.util.concurrent.TimeoutException;
 
 import static org.mockito.Mockito.*;
@@ -98,7 +97,7 @@ public class DepositControllerTest extends ApplicationTest {
         assertNull(depositController.client);
     }
     @Test
-    public void testOnDepositEmptyAmount() throws SQLException {
+    public void testOnDepositEmptyAmount() {
         when(model.searchClient("@bBaker1")).thenReturn(FXCollections.observableArrayList(client));
 
         pAddress_fld.setText("@bBaker1");
@@ -123,7 +122,7 @@ public class DepositControllerTest extends ApplicationTest {
     }
 
     @Test
-    public void testOnDeposit() throws SQLException {
+    public void testOnDeposit() {
         when(model.searchClient("@bBaker1")).thenReturn(FXCollections.observableArrayList(client));
 
         pAddress_fld.setText("@bBaker1");
@@ -137,7 +136,7 @@ public class DepositControllerTest extends ApplicationTest {
     }
 
         @Test
-        public void testOnDepositNull () throws SQLException {
+        public void testOnDepositNull () {
 
             pAddress_fld.setText("");
             depositController.onDeposit();
@@ -145,7 +144,7 @@ public class DepositControllerTest extends ApplicationTest {
 
         }
         @Test
-        public void testOnDepositInvalidAmount () throws SQLException {
+        public void testOnDepositInvalidAmount () {
             pAddress_fld.setText("@bBaker1");
             amount_fld.setText("invalid");
             depositController.onDeposit();
