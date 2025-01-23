@@ -17,6 +17,9 @@ public class AdminMenuController implements Initializable {
 
     private final Model model;
 
+    public AdminMenuController() {
+        this.model = Model.getInstance();
+    }
     public AdminMenuController(Model model) {
         this.model = model;
     }
