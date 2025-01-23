@@ -32,7 +32,7 @@ public class   DashboardController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         bindData();
         initLatestTransactionsList();
-        transaction_listview.setItems(Model.getInstance().getLatestTransactions());
+          transaction_listview.setItems(Model.getInstance().getLatestTransactions());
         transaction_listview.setCellFactory(e -> new TransactionCellFactory());
         send_money_btn.setOnAction(event -> onSendMoney());
         accountSummary();
@@ -46,7 +46,7 @@ public class   DashboardController implements Initializable {
         savings_acc_num.textProperty().bind(Model.getInstance().getClient().savingsAccountProperty().get().accountNumberProperty());
     }
 
-    private void initLatestTransactionsList() {
+    protected void initLatestTransactionsList() {
         if (Model.getInstance().getLatestTransactions().isEmpty()){
             Model.getInstance().setLatestTransactions();
         }
