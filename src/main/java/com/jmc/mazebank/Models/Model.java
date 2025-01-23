@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 
 public class Model {
@@ -120,10 +121,53 @@ public class Model {
         }
     }
 
-    public void setLatestTransactions() {
+   public void setLatestTransactions() {
         prepareTransactions(this.latestTransactions, 4);
     }
+/*
+   public void setLatestTransactions()  {
+       ResultSet resultSet = databaseDriver.getTransactions(client.pAddressProperty().get(), 4);
+       ObservableList<Transaction> transactions = FXCollections.observableArrayList();
 
+       while (true) {
+           try {
+               if (!resultSet.next()) break;
+           } catch (SQLException e) {
+               throw new RuntimeException(e);
+           }
+           Transaction transaction = new Transaction("Sender","Receiver",10000,LocalDate.of(2023,01,01),"Message");
+
+           try {
+               transaction.senderProperty().set(resultSet.getString("Sender"));
+           } catch (SQLException e) {
+               throw new RuntimeException(e);
+           }
+           try {
+               transaction.receiverProperty().set(resultSet.getString("Receiver"));
+           } catch (SQLException e) {
+               throw new RuntimeException(e);
+           }
+           try {
+               transaction.amountProperty().set(resultSet.getDouble(10000));
+           } catch (SQLException e) {
+               throw new RuntimeException(e);
+           }
+           try {
+               transaction.dateProperty().set(LocalDate.parse(resultSet.getString("2023-01-01")));
+           } catch (SQLException e) {
+               throw new RuntimeException(e);
+           }
+           try {
+               transaction.messageProperty().set(resultSet.getString("Message"));
+           } catch (SQLException e) {
+               throw new RuntimeException(e);
+           }
+           transactions.add(transaction);
+       }
+
+       latestTransactions.setAll(transactions);
+   }
+*/
     public ObservableList<Transaction> getLatestTransactions() {
         return latestTransactions;
     }
@@ -232,4 +276,5 @@ public class Model {
     public void setDatabaseDriver(DatabaseDriver databaseDriver) {
         this.databaseDriver = databaseDriver;
     }
+
 }

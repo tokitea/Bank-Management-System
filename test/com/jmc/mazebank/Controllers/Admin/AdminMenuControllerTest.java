@@ -21,15 +21,7 @@ import org.testfx.framework.junit5.ApplicationTest;
 import java.util.concurrent.TimeoutException;
 
 class AdminMenuControllerTest extends ApplicationTest {
-    @BeforeAll
-    static void initializeJavaFX() throws TimeoutException {
-        FxToolkit.registerPrimaryStage();
-    }
 
-    @AfterEach
-    void cleanupJavaFX() throws TimeoutException {
-        FxToolkit.cleanupStages();
-    }
     private AdminMenuController controller;
     private Button createClientBtn;
     private Button clientsBtn;

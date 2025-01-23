@@ -72,6 +72,7 @@ public class DepositController implements Initializable {
             databaseDriver.depositSavings(client.pAddressProperty().get(), newBalance);
             clearFields();
         } catch (NumberFormatException e) {
+
         }
     }
 

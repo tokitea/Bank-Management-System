@@ -28,15 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 class ClientMenuControllerTest extends ApplicationTest {
-    @BeforeAll
-    static void initializeJavaFX() throws TimeoutException {
-        FxToolkit.registerPrimaryStage();
-    }
 
-    @AfterEach
-    void cleanupJavaFX() throws TimeoutException {
-        FxToolkit.cleanupStages();
-    }
     private ClientMenuController controller;
     private Model mockModel;
     private Button dashboardButton;

@@ -27,15 +27,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DepositControllerTest extends ApplicationTest {
-    @BeforeAll
-    static void initializeJavaFX() throws TimeoutException {
-        FxToolkit.registerPrimaryStage();
-    }
 
-    @AfterEach
-    void cleanupJavaFX() throws TimeoutException {
-        FxToolkit.cleanupStages();
-    }
     @InjectMocks
     private DepositController depositController;
 

@@ -1,154 +1,139 @@
 package com.jmc.mazebank.Models;
 
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
+import javafx.collections.ObservableList;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.sql.ResultSet;
-import java.util.List;
+import java.sql.SQLException;
+import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-class ModelTest {
-   /* @Test
-    void testSetClientsWithEmptyResultSet() throws Exception {
-        // Mock an empty ResultSet
-        ResultSet resultSet = Mockito.mock(ResultSet.class);
-        Mockito.when(resultSet.next()).thenReturn(false); // making the database empty
-        DatabaseDriver databaseDriver = Mockito.mock(DatabaseDriver.class);
-        Mockito.when(databaseDriver.getAllClientsData()).thenReturn(resultSet);
+public class ModelTest {
 
-        // Inject the mocked database driver
-        Model controller = new Model(databaseDriver);
-        controller.setClients();
+    private Model model;
+    private DatabaseDriver mockDatabaseDriver;
+    private ResultSet mockResultSet;
 
-        // Verify the clients list is empty
-        assertTrue(controller.getClients().isEmpty(), "Clients list should be empty for empty ResultSet.");
-    }*/
-
-    @Test // list empty -
-    void setClients() throws  Exception{
-        ResultSet resultSet = Mockito.mock(ResultSet.class);
-        Mockito.when(resultSet.next()).thenReturn(false); // making the database empty
-        DatabaseDriver databaseDriver = Mockito.mock(DatabaseDriver.class);
-        Mockito.when(databaseDriver.getAllClientsData()).thenReturn(resultSet);
-
-        // Inject the mocked database driver
-        Model controller = new Model(databaseDriver);
-        controller.setClients();
-
-        // Verify the clients list is empty
-        assertTrue(controller.getClients().isEmpty(), "Clients list should be empty for empty ResultSet.");
-
+    @BeforeEach
+    public void setUp() {
+        mockDatabaseDriver = Mockito.mock(DatabaseDriver.class);
+        mockResultSet = Mockito.mock(ResultSet.class);
+        model = new Model(mockDatabaseDriver);
     }
+
     @Test
-    void testSetClientsWithOneClient() throws Exception {
-        // Mock the ResultSet for clients data (one client)
-        ResultSet resultSet = Mockito.mock(ResultSet.class);
-        Mockito.when(resultSet.next()).thenReturn(true).thenReturn(false);  // One client data
-        Mockito.when(resultSet.getString("FirstName")).thenReturn("John");
-        Mockito.when(resultSet.getString("LastName")).thenReturn("Doe");
-        Mockito.when(resultSet.getString("PayeeAddress")).thenReturn("123MainSt");
-        Mockito.when(resultSet.getString("Date")).thenReturn("1990-01-01");
-
-        // Mock the ResultSet for checking account data
-        ResultSet checkingAccountResultSet = Mockito.mock(ResultSet.class);
-        Mockito.when(checkingAccountResultSet.getString("AccountNumber")).thenReturn("123456");
-        Mockito.when(checkingAccountResultSet.getDouble("TransactionLimit")).thenReturn(1000.0);
-        Mockito.when(checkingAccountResultSet.getDouble("Balance")).thenReturn(5000.0);
-
-        // Mock the ResultSet for savings account data
-        ResultSet savingsAccountResultSet = Mockito.mock(ResultSet.class);
-        Mockito.when(savingsAccountResultSet.getString("AccountNumber")).thenReturn("654321");
-        Mockito.when(savingsAccountResultSet.getDouble("WithdrawalLimit")).thenReturn(2000.0);
-        Mockito.when(savingsAccountResultSet.getDouble("Balance")).thenReturn(10000.0);
-
-        // Mock databaseDriver to return the mocked ResultSets
-        DatabaseDriver databaseDriver = Mockito.mock(DatabaseDriver.class);
-        Mockito.when(databaseDriver.getAllClientsData()).thenReturn(resultSet);
-        Mockito.when(databaseDriver.getCheckingAccountData("123MainSt")).thenReturn(checkingAccountResultSet);
-        Mockito.when(databaseDriver.getSavingsAccountData("123MainSt")).thenReturn(savingsAccountResultSet);
-
-        // Inject the mocked database driver into the Model
-        Model model = new Model(databaseDriver);
-        model.setClients();
-
-        // Verify that the clients list contains exactly one client
-        assertEquals(1, model.getClients().size(), "Clients list should contain one client.");
+    public void testGetInstance() {
+        Model instance = Model.getInstance();
+        assertNotNull(instance);
     }
-   /* @Test
-    void testSetClientsWithLargeData() throws Exception {
-        // Number of clients to simulate
-        int numClients = 1000;
 
-        // Create a mock ResultSet
-        ResultSet resultSet = Mockito.mock(ResultSet.class);
+    @Test
+    public void testEvaluateClientCredSuccess() throws SQLException {
+        when(mockDatabaseDriver.getClientData("testAddress", "password")).thenReturn(mockResultSet);
+        when(mockResultSet.isBeforeFirst()).thenReturn(true);
+        when(mockResultSet.getString("FirstName")).thenReturn("John");
+        when(mockResultSet.getString("LastName")).thenReturn("Doe");
+        when(mockResultSet.getString("PayeeAddress")).thenReturn("testAddress");
+        when(mockResultSet.getString("Date")).thenReturn("2025-01-23");
 
-        // Mock the `next()` method to return true for the specified number of clients
-        Mockito.when(resultSet.next()).thenReturn(true);
-        for (int i = 1; i < numClients; i++) {
-            Mockito.when(resultSet.next()).thenReturn(true);
+        model.evaluateClientCred("testAddress", "password");
 
+        assertTrue(model.getClientLoginSuccessFlag());
+        assertEquals("John", model.getClient().firstNameProperty().get());
+        assertEquals("Doe", model.getClient().lastNameProperty().get());
+        assertEquals("testAddress", model.getClient().pAddressProperty().get());
+        assertEquals(LocalDate.of(2025, 1, 23), model.getClient().dateProperty().get());
+    }
+
+    @Test
+    public void testEvaluateClientCredFailure() throws SQLException {
+        when(mockDatabaseDriver.getClientData("invalid", "password")).thenReturn(mockResultSet);
+        when(mockResultSet.isBeforeFirst()).thenReturn(false);
+
+        model.evaluateClientCred("invalid", "password");
+
+        assertFalse(model.getClientLoginSuccessFlag());
+    }
+
+    @Test
+    public void testSetLatestTransactions() {
+        try {
+            // Mocking the database driver's behavior
+            when(mockDatabaseDriver.getTransactions("testAddress", 4)).thenReturn(mockResultSet);
+            when(mockResultSet.next()).thenReturn(true, false);
+            when(mockResultSet.getString("Sender")).thenReturn("Alice");
+            when(mockResultSet.getString("Receiver")).thenReturn("Bob");
+            when(mockResultSet.getDouble("Amount")).thenReturn(100.0);
+            when(mockResultSet.getString("Date")).thenReturn("2025-01-20");
+            when(mockResultSet.getString("Message")).thenReturn("Test Transaction");
+
+            // Debugging to confirm mock setup
+            System.out.println("Mock setup completed.");
+
+            // Setting up the client and invoking the method under test
+            model.getClient().pAddressProperty().set("testAddress");
+            model.setLatestTransactions();
+
+            // Debugging output for the transactions
+            ObservableList<Transaction> transactions = model.getLatestTransactions();
+            System.out.println("Transactions retrieved: " + transactions);
+
+            // Assertions
+            assertEquals(1, transactions.size());
+            assertEquals("Alice", transactions.get(0).senderProperty().getName());
+            assertEquals("Bob", transactions.get(0).receiverProperty().getName());
+            assertEquals(100.0, transactions.get(0).amountProperty());
+            assertEquals(LocalDate.of(2025, 1, 20), transactions.get(0).dateProperty());
+            assertEquals("Test Transaction", transactions.get(0).messageProperty());
+        } catch (SQLException e) {
+            fail("Unexpected SQLException occurred: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace(); // Log exception stack trace for debugging
+            fail("Unexpected exception occurred: " + e.getMessage());
         }
-        Mockito.when(resultSet.next()).thenReturn(false);  // End of result set
-
-        // Mock behavior for getString() to return dummy data for each column
-        Mockito.when(resultSet.getString(Mockito.eq("FirstName"))).thenAnswer(invocation -> "First Name " + invocation.getArgument(0));
-        Mockito.when(resultSet.getString(Mockito.eq("LastName"))).thenReturn("Last Name");
-        Mockito.when(resultSet.getString(Mockito.eq("PayeeAddress"))).thenReturn("Address");
-        Mockito.when(resultSet.getString(Mockito.eq("Date"))).thenReturn("2023-01-01");
-
-        // Mock DatabaseDriver to return the mocked ResultSet
-        DatabaseDriver databaseDriver = Mockito.mock(DatabaseDriver.class);
-        Mockito.when(databaseDriver.getAllClientsData()).thenReturn(resultSet);
-
-        // Inject the mock into the Model
-        Model model = new Model(databaseDriver);
-
-        // Call the setClients() method to populate the clients list
-        model.setClients();
-
-        // Assert that the expected number of clients were added
-        assertEquals(numClients, model.getClients().size(), "The number of clients should be " + numClients);
-    }*/
-
-    @Test
-    void testSetClientsWithFiveRows() throws Exception {
-        // Create a mock ResultSet
-        ResultSet resultSet = Mockito.mock(ResultSet.class);
-
-        // Mock behavior for next() to return true 5 times to simulate 5 rows in the result set
-        Mockito.when(resultSet.next())
-                .thenReturn(true)  // First row
-                .thenReturn(true)  // Second row
-                .thenReturn(true)  // Third row
-                .thenReturn(true)  // Fourth row
-                .thenReturn(true)  // Fifth row
-                .thenReturn(false); // End of result set
-
-        // Mock behavior for getString() to return dummy data for each column
-        Mockito.when(resultSet.getString("FirstName")).thenReturn("First Name");
-        Mockito.when(resultSet.getString("LastName")).thenReturn("Last Name");
-        Mockito.when(resultSet.getString("PayeeAddress")).thenReturn("Address");
-        Mockito.when(resultSet.getString("Date")).thenReturn("2023-01-01");
-
-        // Mock DatabaseDriver to return the mocked ResultSet
-        DatabaseDriver databaseDriver = Mockito.mock(DatabaseDriver.class);
-        Mockito.when(databaseDriver.getAllClientsData()).thenReturn(resultSet);
-
-        // Inject the mock into the Model
-        Model model = new Model(databaseDriver);
-
-        // Call the setClients() method to populate the clients list
-        model.setClients();
-
-        // Assert that 5 clients were added
-        assertEquals(5, model.getClients().size(), "The number of clients should be 5");
     }
 
 
+    @Test
+    public void testSetClients() throws SQLException {
+        when(mockDatabaseDriver.getAllClientsData()).thenReturn(mockResultSet);
+        when(mockResultSet.next()).thenReturn(true, false);
+        when(mockResultSet.getString("FirstName")).thenReturn("John");
+        when(mockResultSet.getString("LastName")).thenReturn("Doe");
+        when(mockResultSet.getString("PayeeAddress")).thenReturn("testAddress");
+        when(mockResultSet.getString("Date")).thenReturn("2025-01-23");
 
+        model.setClients();
+
+        ObservableList<Client> clients = model.getClients();
+        assertEquals(1, clients.size());
+        assertEquals("John", clients.get(0).firstNameProperty().get());
+        assertEquals("Doe", clients.get(0).lastNameProperty().get());
+        assertEquals("testAddress", clients.get(0).pAddressProperty().get());
+        assertEquals(LocalDate.of(2025, 1, 23), clients.get(0).dateProperty().get());
+    }
+
+    @Test
+    public void testEvaluateAdminCredSuccess() throws SQLException {
+        when(mockDatabaseDriver.getAdminData("admin", "adminpass")).thenReturn(mockResultSet);
+        when(mockResultSet.isBeforeFirst()).thenReturn(true);
+
+        model.evaluateAdminCred("admin", "adminpass");
+
+        assertTrue(model.getAdminLoginSuccessFlag());
+    }
+
+    @Test
+    public void testEvaluateAdminCredFailure() throws SQLException {
+        when(mockDatabaseDriver.getAdminData("admin", "wrongpass")).thenReturn(mockResultSet);
+        when(mockResultSet.isBeforeFirst()).thenReturn(false);
+
+        model.evaluateAdminCred("admin", "wrongpass");
+
+        assertFalse(model.getAdminLoginSuccessFlag());
+    }
 }

@@ -38,7 +38,7 @@ class DashboardControllerTest {
     }*/
 
     @BeforeEach
-    void setUp() {
+    void setUp(){
         // Mock the DashboardController
         controller = Mockito.mock(DashboardController.class);
 
