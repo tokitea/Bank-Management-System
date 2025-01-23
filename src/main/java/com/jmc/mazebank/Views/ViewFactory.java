@@ -160,7 +160,7 @@ public class ViewFactory {
         stage.show();
     }
 
-    private void createStage(FXMLLoader loader) {
+    public void createStage(FXMLLoader loader) {
         Scene scene = null;
         try {
             scene = new Scene(loader.load());

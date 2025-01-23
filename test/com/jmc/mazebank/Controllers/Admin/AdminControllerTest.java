@@ -5,18 +5,30 @@ import com.jmc.mazebank.Views.ViewFactory;
 import com.jmc.mazebank.Views.AdminMenuOptions;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.layout.BorderPane;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.testfx.api.FxToolkit;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 class AdminControllerTest {
+    @BeforeAll
+    static void initializeJavaFX() throws TimeoutException {
+        FxToolkit.registerPrimaryStage();
+    }
 
+    @AfterEach
+    void cleanupJavaFX() throws TimeoutException {
+        FxToolkit.cleanupStages();
+    }
     private AdminController adminController;
     private BorderPane mockAdminParent;
     private Model mockModel;

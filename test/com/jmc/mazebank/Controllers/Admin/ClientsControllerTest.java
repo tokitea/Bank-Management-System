@@ -5,17 +5,28 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testfx.api.FxToolkit;
 
 import java.time.LocalDate;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ClientsControllerTest {
+    @BeforeAll
+    static void initializeJavaFX() throws TimeoutException {
+        FxToolkit.registerPrimaryStage();
+    }
 
+    @AfterEach
+    void cleanupJavaFX() throws TimeoutException {
+        FxToolkit.cleanupStages();
+    }
     private ClientsController controller;
     private Model mockModel;
     private ObservableList<Client> mockClients;

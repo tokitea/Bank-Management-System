@@ -7,18 +7,30 @@ import com.jmc.mazebank.Models.SavingsAccount;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.scene.control.Label;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.testfx.api.FxToolkit;
 
 import java.time.LocalDate;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ClientCellControllerTest {
+    @BeforeAll
+    static void initializeJavaFX() throws TimeoutException {
+        FxToolkit.registerPrimaryStage();
+    }
+
+    @AfterEach
+    void cleanupJavaFX() throws TimeoutException {
+        FxToolkit.cleanupStages();
+    }
     @Mock
     private Client mockClient;
 

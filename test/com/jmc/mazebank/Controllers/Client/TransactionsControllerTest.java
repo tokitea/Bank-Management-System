@@ -6,17 +6,29 @@ import com.jmc.mazebank.Views.TransactionCellFactory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testfx.api.FxToolkit;
 
 import java.time.LocalDate;
+import java.util.concurrent.TimeoutException;
 
 import static org.mockito.Mockito.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TransactionsControllerTest {
+    @BeforeAll
+    static void initializeJavaFX() throws TimeoutException {
+        FxToolkit.registerPrimaryStage();
+    }
 
+    @AfterEach
+    void cleanupJavaFX() throws TimeoutException {
+        FxToolkit.cleanupStages();
+    }
     private TransactionsController controller;
     private Model mockModel;
     private ObservableList<Transaction> mockTransactions;

@@ -10,19 +10,32 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import com.jmc.mazebank.Models.DatabaseDriver;
+import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit5.ApplicationTest;
+
+import java.util.concurrent.TimeoutException;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DepositControllerTest extends ApplicationTest {
+    @BeforeAll
+    static void initializeJavaFX() throws TimeoutException {
+        FxToolkit.registerPrimaryStage();
+    }
 
+    @AfterEach
+    void cleanupJavaFX() throws TimeoutException {
+        FxToolkit.cleanupStages();
+    }
     @InjectMocks
     private DepositController depositController;
 

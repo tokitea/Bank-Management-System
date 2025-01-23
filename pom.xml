@@ -72,13 +72,22 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.9.2</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testfx</groupId>
             <artifactId>testfx-junit5</artifactId>
             <version>4.0.17</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>cn.chenzw.toolkit</groupId>
+            <artifactId>toolkit</artifactId>
+            <version>1.0.3-a</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.chenzw.toolkit</groupId>
+            <artifactId>toolkit</artifactId>
+            <version>1.0.3-a</version>
         </dependency>
     </dependencies>
 

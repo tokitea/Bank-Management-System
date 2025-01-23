@@ -22,6 +22,8 @@ public class LoginController implements Initializable {
     public Button login_btn;
     public Label error_lbl;
 
+
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         acc_selector.setItems(FXCollections.observableArrayList(AccountType.CLIENT, AccountType.ADMIN));
