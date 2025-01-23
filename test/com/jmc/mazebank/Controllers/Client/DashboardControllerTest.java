@@ -30,13 +30,13 @@ class DashboardControllerTest {
     private Account mockCheckingAccount;
     private Account mockSavingsAccount;
     private ObservableList<Transaction> mockTransactions;
-
+/*
     @BeforeAll
     static void initToolkit() {
         // Initialize the JavaFX toolkit
         Platform.startup(() -> {});
     }
-
+*/
     @BeforeEach
     void setUp(){
         // Mock the DashboardController

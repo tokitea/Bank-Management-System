@@ -22,8 +22,8 @@ class ClientsControllerTest {
     private ClientsController controller;
     private Model mockModel;
     private ObservableList<Client> mockClients;
-    @BeforeAll
-/*
+    /*@BeforeAll
+
     public static void initToolkit() {
         // Start the JavaFX toolkit
         Platform.startup(() -> {});
