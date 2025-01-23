@@ -76,6 +76,45 @@ public class DepositControllerTest extends ApplicationTest {
         when(client.savingsAccountProperty()).thenReturn(new SimpleObjectProperty<>(mockSavingsAccount));
         when(client.pAddressProperty()).thenReturn(new SimpleStringProperty("@bBaker1"));
     }
+    @Test
+    public void testDefaultConstructor() {
+        DepositController controller = new DepositController();
+        assertNotNull(controller.model);
+        assertNotNull(controller.databaseDriver);
+    }
+    @Test
+    public void testParameterizedConstructor() {
+        DepositController controller = new DepositController(model, databaseDriver);
+        assertEquals(model, controller.model);
+        assertEquals(databaseDriver, controller.databaseDriver);
+    }
+    @Test
+    public void testInitialize() {
+        depositController.initialize(null, null);
+        assertNotNull(depositController.search_btn.getOnAction());
+        assertNotNull(depositController.deposit_btn.getOnAction());
+    }
+    @Test
+    public void testOnClientSearchNoResults() {
+        when(model.searchClient("@Jo")).thenReturn(FXCollections.observableArrayList());
+
+        pAddress_fld.setText("@Jo");
+        depositController.onClientSearch();
+
+        assertTrue(result_listview.getItems().isEmpty());
+        assertNull(depositController.client);
+    }
+    @Test
+    public void testOnDepositEmptyAmount() {
+        when(model.searchClient("@bBaker1")).thenReturn(FXCollections.observableArrayList(client));
+
+        pAddress_fld.setText("@bBaker1");
+        amount_fld.setText(""); // Empty amount
+        depositController.onClientSearch();
+        depositController.onDeposit();
+
+        verify(databaseDriver, never()).depositSavings(anyString(), anyDouble());
+    }
 
     @Test
     public void testOnClientSearch() {
@@ -104,12 +143,20 @@ public class DepositControllerTest extends ApplicationTest {
         assertEquals("", amount_fld.getText());
     }
 
-    @Test
-    public void testOnDepositInvalidAmount() {
-        pAddress_fld.setText("@bBaker1");
-        amount_fld.setText("invalid");
-        depositController.onDeposit();
+        @Test
+        public void testOnDepositNull () {
 
-        verify(databaseDriver, never()).depositSavings(anyString(), anyDouble());
+            pAddress_fld.setText("");
+            depositController.onDeposit();
+            verify(databaseDriver, never()).depositSavings(anyString(), anyDouble());
+
+        }
+        @Test
+        public void testOnDepositInvalidAmount () {
+            pAddress_fld.setText("@bBaker1");
+            amount_fld.setText("invalid");
+            depositController.onDeposit();
+
+            verify(databaseDriver, never()).depositSavings(anyString(), anyDouble());
+        }
     }
-}

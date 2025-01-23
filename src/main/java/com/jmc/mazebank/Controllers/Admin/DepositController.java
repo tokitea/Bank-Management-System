@@ -15,8 +15,8 @@ import java.util.ResourceBundle;
 
 public class DepositController implements Initializable {
 
-    private Model model;
-    private DatabaseDriver databaseDriver;
+    Model model;
+    DatabaseDriver databaseDriver;
 
     @FXML
 
