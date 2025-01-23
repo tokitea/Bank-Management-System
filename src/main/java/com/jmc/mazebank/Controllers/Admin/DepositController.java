@@ -11,6 +11,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 public class DepositController implements Initializable {
@@ -71,7 +72,7 @@ public class DepositController implements Initializable {
             double newBalance = client.savingsAccountProperty().get().balanceProperty().get() + amount;
             databaseDriver.depositSavings(client.pAddressProperty().get(), newBalance);
             clearFields();
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | SQLException e) {
         }
     }
 

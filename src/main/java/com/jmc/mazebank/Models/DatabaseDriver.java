@@ -9,215 +9,213 @@ public class DatabaseDriver {
     public DatabaseDriver() {
         try {
             this.conn = DriverManager.getConnection("jdbc:sqlite:mazebank.db");
-        } catch (SQLException e){
-            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("Error connecting to the database: " + e.getMessage());
         }
     }
 
     /*
-    * Client Section
-    * */
+     * Client Section
+     */
 
     public ResultSet getClientData(String pAddress, String password) {
-        Statement statement;
-        ResultSet resultSet = null;
-        try {
-            statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM Clients WHERE PayeeAddress='"+pAddress+"' AND Password='"+password+"';");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "SELECT * FROM Clients WHERE PayeeAddress = ? AND Password = ?";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, pAddress);
+            statement.setString(2, password);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("Error fetching client data: " + e.getMessage());
         }
-        return resultSet;
+        return null;
     }
 
     public ResultSet getTransactions(String pAddress, int limit) {
-        Statement statement;
-        ResultSet resultSet = null;
-        try {
-            statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM Transactions WHERE Sender='"+pAddress+"' OR Receiver='"+pAddress+"' LIMIT "+limit+";");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "SELECT * FROM Transactions WHERE Sender = ? OR Receiver = ? LIMIT ?";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, pAddress);
+            statement.setString(2, pAddress);
+            statement.setInt(3, limit);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("Error fetching transactions: " + e.getMessage());
         }
-        return resultSet;
+        return null;
     }
 
-    // Method returns savings account balance
     public double getSavingsAccountBalance(String pAddress) {
-        Statement statement;
-        ResultSet resultSet;
-        double balance = 0;
-        try {
-            statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM SavingsAccounts WHERE Owner='"+pAddress+"';");
-            balance = resultSet.getDouble("Balance");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "SELECT Balance FROM SavingsAccounts WHERE Owner = ?";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, pAddress);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getDouble("Balance");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error fetching savings account balance: " + e.getMessage());
         }
-        return balance;
+        return 0;
     }
 
-    // Method to either add or subtract from balance given operation
     public void updateBalance(String pAddress, double amount, String operation) {
-        Statement statement;
-        ResultSet resultSet;
-        try{
-            statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM SavingsAccounts WHERE Owner='"+pAddress+"';");
-            double newBalance;
-            if (operation.equals("ADD")){
-                newBalance = resultSet.getDouble("Balance") + amount;
-                statement.executeUpdate("UPDATE SavingsAccounts SET Balance="+newBalance+" WHERE Owner='"+pAddress+"';");
-            } else {
-                if (resultSet.getDouble("Balance") >= amount) {
-                    newBalance = resultSet.getDouble("Balance") - amount;
-                    statement.executeUpdate("UPDATE SavingsAccounts SET Balance="+newBalance+" WHERE Owner='"+pAddress+"';");
+        String query = "SELECT Balance FROM SavingsAccounts WHERE Owner = ?";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, pAddress);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                double currentBalance = resultSet.getDouble("Balance");
+                double newBalance = operation.equals("ADD") ? currentBalance + amount : currentBalance - amount;
+                if (newBalance >= 0) {
+                    String updateQuery = "UPDATE SavingsAccounts SET Balance = ? WHERE Owner = ?";
+                    try (PreparedStatement updateStatement = this.conn.prepareStatement(updateQuery)) {
+                        updateStatement.setDouble(1, newBalance);
+                        updateStatement.setString(2, pAddress);
+                        updateStatement.executeUpdate();
+                    }
+                } else {
+                    System.out.println("Insufficient funds for the operation.");
                 }
             }
-        }catch (SQLException e){
-            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("Error updating balance: " + e.getMessage());
+        }
+    }
+    public void depositSavings(String pAddress, double amount) throws SQLException {
+        String query = "UPDATE SavingsAccounts SET Balance = Balance + ? WHERE Owner = ?";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setDouble(1, amount);
+            statement.setString(2, pAddress);
+            int rowsAffected = statement.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new SQLException("No account found for the provided Payee Address: " + pAddress);
+            }
         }
     }
 
-    // Creates and records new transaction
     public void newTransaction(String sender, String receiver, double amount, String message) {
-        Statement statement;
-        try {
-            statement = this.conn.createStatement();
-            LocalDate date = LocalDate.now();
-            statement.executeUpdate("INSERT INTO " +
-                    "Transactions(Sender, Receiver, Amount, Date, Message) " +
-                    "VALUES ('"+sender+"', '"+receiver+"', "+amount+", '"+date+"', '"+message+"');");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "INSERT INTO Transactions(Sender, Receiver, Amount, Date, Message) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, sender);
+            statement.setString(2, receiver);
+            statement.setDouble(3, amount);
+            statement.setString(4, LocalDate.now().toString());
+            statement.setString(5, message);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error creating new transaction: " + e.getMessage());
         }
     }
 
     /*
-    * Admin Section
-    * */
+     * Admin Section
+     */
 
     public ResultSet getAdminData(String username, String password) {
-        Statement statement;
-        ResultSet resultSet = null;
-        try {
-            statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM Admins WHERE Username='"+username+"' AND Password='"+password+"';");
-        }catch (Exception e){
-            e.printStackTrace();
+        String query = "SELECT * FROM Admins WHERE Username = ? AND Password = ?";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, username);
+            statement.setString(2, password);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("Error fetching admin data: " + e.getMessage());
         }
-        return resultSet;
+        return null;
     }
 
     public void createClient(String fName, String lName, String pAddress, String password, LocalDate date) {
-        Statement statement;
-        try {
-            statement = this.conn.createStatement();
-            statement.executeUpdate("INSERT INTO " +
-                    "Clients (FirstName, LastName, PayeeAddress, Password, Date)" +
-                    "VALUES ('"+fName+"', '"+lName+"', '"+pAddress+"', '"+password+"', '"+date.toString()+"');");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "INSERT INTO Clients (FirstName, LastName, PayeeAddress, Password, Date) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, fName);
+            statement.setString(2, lName);
+            statement.setString(3, pAddress);
+            statement.setString(4, password);
+            statement.setString(5, date.toString());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error creating client: " + e.getMessage());
         }
     }
 
     public void createCheckingAccount(String owner, String number, double tLimit, double balance) {
-        Statement statement;
-        try {
-            statement = this.conn.createStatement();
-            statement.executeUpdate("INSERT INTO " +
-                    "CheckingAccounts (Owner, AccountNumber, TransactionLimit, Balance)" +
-                    " VALUES ('"+owner+"', '"+number+"', "+tLimit+", "+balance+")");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "INSERT INTO CheckingAccounts (Owner, AccountNumber, TransactionLimit, Balance) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, owner);
+            statement.setString(2, number);
+            statement.setDouble(3, tLimit);
+            statement.setDouble(4, balance);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error creating checking account: " + e.getMessage());
         }
     }
 
     public void createSavingsAccount(String owner, String number, double wLimit, double balance) {
-        Statement statement;
-        try {
-            statement = this.conn.createStatement();
-            statement.executeUpdate("INSERT INTO " +
-                    "SavingsAccounts (Owner, AccountNumber, WithdrawalLimit, Balance)" +
-                    " VALUES ('"+owner+"', '"+number+"', "+wLimit+", "+balance+")");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "INSERT INTO SavingsAccounts (Owner, AccountNumber, WithdrawalLimit, Balance) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, owner);
+            statement.setString(2, number);
+            statement.setDouble(3, wLimit);
+            statement.setDouble(4, balance);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error creating savings account: " + e.getMessage());
         }
     }
 
     public ResultSet getAllClientsData() {
-        Statement statement;
-        ResultSet resultSet = null;
-        try {
-            statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM Clients;");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "SELECT * FROM Clients";
+        try (Statement statement = this.conn.createStatement()) {
+            return statement.executeQuery(query);
+        } catch (SQLException e) {
+            System.out.println("Error fetching all clients data: " + e.getMessage());
         }
-        return resultSet;
+        return null;
     }
-
-    public void depositSavings(String pAddress, double amount) {
-        Statement statement;
-        try {
-            statement = this.conn.createStatement();
-            statement.executeUpdate("UPDATE SavingsAccounts SET Balance="+amount+" WHERE Owner='"+pAddress+"';");
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
-    }
-
-    /*
-    * Utility Methods
-    * */
 
     public ResultSet searchClient(String pAddress) {
-        Statement statement;
-        ResultSet resultSet = null;
-        try {
-            statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM Clients WHERE PayeeAddress='"+pAddress+"';");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "SELECT * FROM Clients WHERE PayeeAddress = ?";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, pAddress);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("Error searching client: " + e.getMessage());
         }
-        return resultSet;
+        return null;
     }
 
     public int getLastClientsId() {
-        Statement statement;
-        ResultSet resultSet;
-        int id = 0;
-        try {
-            statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM sqlite_sequence WHERE name='Clients';");
-            id = resultSet.getInt("seq");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "SELECT seq FROM sqlite_sequence WHERE name = 'Clients'";
+        try (Statement statement = this.conn.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+            if (resultSet.next()) {
+                return resultSet.getInt("seq");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error fetching last client ID: " + e.getMessage());
         }
-        return id;
+        return 0;
     }
 
     public ResultSet getCheckingAccountData(String pAddress) {
-        Statement statement;
-        ResultSet resultSet = null;
-        try {
-            statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM CheckingAccounts WHERE Owner='"+pAddress+"';");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "SELECT * FROM CheckingAccounts WHERE Owner = ?";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, pAddress);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("Error fetching checking account data: " + e.getMessage());
         }
-        return resultSet;
+        return null;
     }
 
     public ResultSet getSavingsAccountData(String pAddress) {
-        Statement statement;
-        ResultSet resultSet = null;
-        try {
-            statement = this.conn.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM SavingsAccounts WHERE Owner='"+pAddress+"';");
-        }catch (SQLException e){
-            e.printStackTrace();
+        String query = "SELECT * FROM SavingsAccounts WHERE Owner = ?";
+        try (PreparedStatement statement = this.conn.prepareStatement(query)) {
+            statement.setString(1, pAddress);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("Error fetching savings account data: " + e.getMessage());
         }
-        return resultSet;
+        return null;
     }
 }
