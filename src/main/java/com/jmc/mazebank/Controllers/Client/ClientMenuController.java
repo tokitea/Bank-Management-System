@@ -54,6 +54,10 @@ public class ClientMenuController implements Initializable {
         model.getViewFactory().getClientSelectedMenuItem().set(ClientMenuOptions.ACCOUNTS);
     }
 
+    public void onDelete(){
+        model.getViewFactory().getClientSelectedMenuItem().set(ClientMenuOptions.DELETE);
+    }
+
     public void onLogout() {
         Stage stage = (Stage) dashboard_btn.getScene().getWindow();
         model.getViewFactory().closeStage(stage);

@@ -45,88 +45,69 @@ public class CreateClientController implements Initializable {
             if (newVal){createSavingsAccountFlag = true;}
         });
     }
-//client creation and account setup
-public void createClient() {
-    // Validate fields
-    if (fName_fld.getText() == null || fName_fld.getText().trim().isEmpty() || fName_fld.getText().length() < 3) {
-        error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
-        error_lbl.setText("Error: First Name Too Short");
-        return; // Exit if validation fails
-    }
-
-    if (lName_fld.getText() == null || lName_fld.getText().trim().isEmpty()) {
-        error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
-        error_lbl.setText("Error: Last Name is required!");
-        return; // Exit if validation fails
-    }
-
-    if (password_fld.getText() == null || password_fld.getText().trim().isEmpty()) {
-        error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
-        error_lbl.setText("Error: Password is required!");
-        return; // Exit if validation fails
-    }
-
-    // Create Checking account
-    if (createCheckingAccountFlag) {
-        createAccount("Checking");
-    }
-    // Create Savings Account
-    if (createSavingsAccountFlag) {
-        createAccount("Savings");
-    }
-    // Create Client
-    String fName = fName_fld.getText();
-    String lName = lName_fld.getText();
-    String password = password_fld.getText();
-    Model.getInstance().getDatabaseDriver().createClient(fName, lName, payeeAddress, password, LocalDate.now()); // Create client in database
-
-    error_lbl.setStyle("-fx-text-fill: blue; -fx-font-size: 1.3em; -fx-font-weight: bold");
-    error_lbl.setText("Client Created Successfully!");
-    emptyFields();
-}
-
-
-    //create checking or savings accounts with appropriate account numbers and balance
-   /* public void createAccount(String accountType) {
-        // Check if the amount field is empty
-        String amountText = ch_amount_fld.getText();
-        if (amountText.isEmpty()) {
-            // Handle the error case
-            error_lbl.setText("Error: Amount cannot be empty!");
-            return; // Exit the method to prevent further execution
-        }
-        double amount = Double.parseDouble(amountText);
-
-        // Check if the amount is valid
-        if (amount <= 0) {
-            error_lbl.setText("Error: Amount must be positive!");
-            return;
+    public void createClient() {
+        // Validate fields and show errors if necessary
+        if (fName_fld.getText() == null || fName_fld.getText().trim().isEmpty() || fName_fld.getText().length() < 3) {
+            error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
+            error_lbl.setText("Error: First Name Too Short");
+            return; // Exit if validation fails
         }
 
-        double balance;
-        try {
-            balance = Double.parseDouble(amountText);
-        } catch (NumberFormatException e) {
-            // Handle the case where the input is not a valid double
-            error_lbl.setText("Error: Please enter a valid amount!");
-            return; // Exit the method to prevent further execution
+        if (lName_fld.getText() == null || lName_fld.getText().trim().isEmpty()) {
+            error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
+            error_lbl.setText("Error: Last Name is required!");
+            return; // Exit if validation fails
         }
 
-        // Generate Account Number
-        String firstSection = "3201";
-        String lastSection = Integer.toString((new Random()).nextInt(9999) + 1000);
-        String accountNumber = firstSection + " " + lastSection;
-
-        // Create the checking or savings account
-        if (accountType.equals("Checking")) {
-            Model.getInstance().getDatabaseDriver().createCheckingAccount(payeeAddress, accountNumber, 10, balance);
-        } else {
-            Model.getInstance().getDatabaseDriver().createSavingsAccount(payeeAddress, accountNumber, 2000, balance);
+        if (password_fld.getText() == null || password_fld.getText().trim().isEmpty()) {
+            error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
+            error_lbl.setText("Error: Password is required!");
+            return; // Exit if validation fails
         }
+
+        // Ensure payeeAddress is set (generate it if not already set)
+        if (payeeAddress == null || payeeAddress.isEmpty()) {
+            error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
+            error_lbl.setText("Error: Payee Address is required!");
+            return; // Exit if validation fails
+        }
+
+        // Ensure that at least one account type is selected
+        if (!createCheckingAccountFlag && !createSavingsAccountFlag) {
+            error_lbl.setStyle("-fx-text-fill: red; -fx-font-size: 1.2em; -fx-font-weight: bold");
+            error_lbl.setText("Error: Please select either Checking or Savings account.");
+            return; // Exit if no account type is selected
+        }
+
+        if(createCheckingAccountFlag)
+        {
+            createAccount("Checking");
+        }
+
+        if(createSavingsAccountFlag)
+        {
+            createAccount("Savings");
+        }
+
+        // Create client in the database
+        String fName = fName_fld.getText();
+        String lName = lName_fld.getText();
+        String password = password_fld.getText();
+
+        // Insert client data into the database
+        Model.getInstance().getDatabaseDriver().createClient(fName, lName, payeeAddress, password, LocalDate.now());
+
+
+        // Success message
+        error_lbl.setStyle("-fx-text-fill: blue; -fx-font-size: 1.3em; -fx-font-weight: bold");
+        error_lbl.setText("Client Created Successfully!");
+
+        // Clear form fields after creation
+        emptyFields();
     }
-*/
+
     public void createAccount(String accountType) {
-        // Check if the amount field is empty
+        // Validate amount input
         String amountText = ch_amount_fld.getText();
         if (amountText.isEmpty()) {
             error_lbl.setText("Error: Amount cannot be empty!");
@@ -141,7 +122,6 @@ public void createClient() {
             return;
         }
 
-        // Check if the amount is valid
         if (balance <= 0) {
             error_lbl.setText("Error: Amount must be positive!");
             return;
@@ -157,14 +137,24 @@ public void createClient() {
         String lastSection = Integer.toString((new Random()).nextInt(9999) + 1000);
         String accountNumber = firstSection + " " + lastSection;
 
-        // Create the checking or savings account
+        // Handle the case when no account type is selected (both unchecked)
+        if (accountType == null || accountType.isEmpty()) {
+            error_lbl.setText("Error: Please select an account type (Checking or Savings).");
+            return;
+        }
+
+        // Create the checking or savings account based on the selected account type
         if (accountType.equals("Checking")) {
+            // If checking account is selected, pass balance as provided
             Model.getInstance().getDatabaseDriver().createCheckingAccount(payeeAddress, accountNumber, 10, balance);
         } else if (accountType.equals("Savings")) {
+            // If savings account is selected, pass balance as provided
             Model.getInstance().getDatabaseDriver().createSavingsAccount(payeeAddress, accountNumber, 2000, balance);
+        } else {
+            // If the account type is invalid
+            error_lbl.setText("Error: Invalid account type selected!");
         }
     }
-
 
     //updates the paddressLbl when the payee address is created
     protected void onCreatePayeeAddress() {

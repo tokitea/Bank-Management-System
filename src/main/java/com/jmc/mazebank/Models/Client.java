@@ -35,4 +35,5 @@ public class Client {
     public ObjectProperty<Account> savingsAccountProperty() {return savingsAccount;}
 
     public ObjectProperty<LocalDate> dateProperty() {return dateCreated;}
+
 }

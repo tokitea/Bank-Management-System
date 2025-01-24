@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DatabaseDriver {
-    private static final Logger LOGGER = Logger.getLogger(DatabaseDriver.class.getName());
+    public static final Logger LOGGER = Logger.getLogger(DatabaseDriver.class.getName());
     Connection conn;
 
     public DatabaseDriver() {
@@ -108,7 +108,9 @@ public class DatabaseDriver {
             statement.setString(1, sender);
             statement.setString(2, receiver);
             statement.setDouble(3, amount);
-            statement.setDate(4, Date.valueOf(LocalDate.now()));
+
+            // Use toString() for the date and set it as a string
+            statement.setString(4, LocalDate.now().toString()); // Converts to yyyy-MM-dd string
             statement.setString(5, message);
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -140,14 +142,17 @@ public class DatabaseDriver {
             statement.setString(2, lName);
             statement.setString(3, pAddress);
             statement.setString(4, password);
-            statement.setDate(5, Date.valueOf(date));
+            statement.setString(5, date.toString());
             statement.executeUpdate();
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error creating client", e);
         }
     }
-
     public void createCheckingAccount(String owner, String number, double tLimit, double balance) {
+        if (balance == 0) {
+            balance = 0.0; // Ensure no null balance is passed
+        }
+
         String query = "INSERT INTO CheckingAccounts (Owner, AccountNumber, TransactionLimit, Balance) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = conn.prepareStatement(query)) {
             statement.setString(1, owner);
@@ -161,6 +166,10 @@ public class DatabaseDriver {
     }
 
     public void createSavingsAccount(String owner, String number, double wLimit, double balance) {
+        if (balance == 0) {
+            balance = 0.0; // Ensure no null balance is passed
+        }
+
         String query = "INSERT INTO SavingsAccounts (Owner, AccountNumber, WithdrawalLimit, Balance) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = conn.prepareStatement(query)) {
             statement.setString(1, owner);
@@ -172,6 +181,7 @@ public class DatabaseDriver {
             LOGGER.log(Level.SEVERE, "Error creating savings account", e);
         }
     }
+
 
     public ResultSet getAllClientsData() {
         String query = "SELECT * FROM Clients";
@@ -198,19 +208,17 @@ public class DatabaseDriver {
     /**
      * Utility Methods
      */
-
     public ResultSet searchClient(String pAddress) {
         String query = "SELECT * FROM Clients WHERE PayeeAddress = ?";
         try {
-            PreparedStatement statement = conn.prepareStatement(query);
+            PreparedStatement statement = conn.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             statement.setString(1, pAddress);
-            return statement.executeQuery();
+            return statement.executeQuery(); // Caller must close the ResultSet and statement
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error searching for client", e);
         }
         return null;
     }
-
     public int getLastClientsId() {
         String query = "SELECT seq FROM sqlite_sequence WHERE name = 'Clients'";
         try (Statement statement = conn.createStatement(); ResultSet resultSet = statement.executeQuery(query)) {

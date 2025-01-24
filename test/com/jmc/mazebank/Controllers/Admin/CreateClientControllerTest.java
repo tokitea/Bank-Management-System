@@ -117,6 +117,7 @@ class CreateClientControllerTest {
 
         WaitForAsyncUtils.waitForFxEvents();
     }
+
     @Test
     void testOnCreatePayeeAddress() throws Exception {
         // Arrange
@@ -178,8 +179,13 @@ class CreateClientControllerTest {
         waitForJavaFX(); // Ensure all JavaFX events are processed
     }
 
-
     private void waitForJavaFX() {
+        // Add a small delay to ensure JavaFX event processing
+        try {
+            Thread.sleep(100); // Sleep for 100ms to allow event processing
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Test
@@ -195,6 +201,7 @@ class CreateClientControllerTest {
             controller.ch_amount_fld.setText("1000.00");
             controller.sv_amount_fld.setText("5000.00");
 
+            // Mock the methods to do nothing (ensure no real DB changes)
             doNothing().when(mockDatabaseDriver).createCheckingAccount(anyString(), anyString(), anyDouble(), anyDouble());
             doNothing().when(mockDatabaseDriver).createSavingsAccount(anyString(), anyString(), anyDouble(), anyDouble());
 
